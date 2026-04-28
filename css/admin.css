@@ -1,0 +1,60 @@
+/* --- ФИКС ВЫРАВНИВАНИЯ В ТАБЛИЦАХ --- */
+table th, table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    vertical-align: top; /* Текст прижимается вверх */
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    max-width: 250px; /* Ограничиваем ширину текста */
+}
+
+/* Ячейки с изображениями */
+.products-table td img,
+.news-table td img {
+    display: block;
+    margin: 0 auto;
+}
+
+/* Кнопки внутри таблицы */
+.products-table td .btn-edit,
+.products-table td .btn-delete,
+.news-table td .btn-edit,
+.news-table td .btn-delete {
+    display: inline-block;
+    margin: 3px 0;
+    white-space: nowrap;
+}
+
+/* Описание продуктов и новостей */
+.products-table td:nth-child(4),
+.news-table td:nth-child(3) {
+    max-width: 300px;
+    overflow-wrap: break-word;
+    line-height: 1.4;
+}
+
+/* --- КАРТОЧКИ ЗАКАЗОВ --- */
+.order-card p {
+    margin: 4px 0;
+    line-height: 1.4;
+}
+
+.order-card table th,
+.order-card table td {
+    font-size: 13px;
+    vertical-align: top;
+}
+
+/* --- АДАПТИВНОСТЬ --- */
+@media (max-width: 768px) {
+    table th, table td {
+        font-size: 12px;
+        padding: 8px;
+    }
+    .products-table td:nth-child(4),
+    .news-table td:nth-child(3) {
+        max-width: 200px;
+    }
+}

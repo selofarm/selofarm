@@ -1,0 +1,386 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* ===== HEADER ===== */
+header {
+    background: #2c6b2f;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav .logo a {
+    color: white;
+    font-size: 26px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 25px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s;
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+nav ul li a:hover {
+    background: rgba(255,255,255,0.1);
+    color: #a3d7a3;
+}
+
+/* ===== SECTION ===== */
+.section {
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 0 20px;
+}
+
+.section h1 {
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.ai-recipe-box {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 40px;
+}
+
+.ai-kicker {
+    margin: 0 0 8px;
+    color: #2c6b2f;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.ai-recipe-box h2 {
+    margin: 0 0 10px;
+    font-size: 28px;
+}
+
+.ai-subtitle {
+    margin: 0;
+    color: #5b5b5b;
+}
+
+.ai-recipe-form {
+    margin-top: 24px;
+}
+
+.ai-recipe-form label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.ai-form-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+}
+
+.ai-form-row input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #d6d6d6;
+    border-radius: 10px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.ai-submit {
+    background: #2c6b2f;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ai-submit:hover {
+    background: #245826;
+}
+
+.ai-result {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.ai-recipe-card,
+.ai-products-card {
+    background: #f9fbf7;
+    border: 1px solid #e3ecd9;
+    border-radius: 14px;
+    padding: 22px;
+}
+
+.ai-recipe-card h3,
+.ai-products-card h3 {
+    margin-top: 0;
+    margin-bottom: 14px;
+    font-size: 24px;
+}
+
+.ai-recipe-card h4,
+.ai-products-card h4 {
+    margin: 22px 0 10px;
+    font-size: 18px;
+}
+
+.ai-intro {
+    margin: 0;
+}
+
+.ai-list,
+.ai-steps {
+    margin: 0;
+    padding-left: 22px;
+}
+
+.ai-list li,
+.ai-steps li {
+    margin-bottom: 8px;
+}
+
+.ai-products-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.ai-product-item {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+    padding: 16px;
+    background: white;
+    border: 1px solid #ebebeb;
+    border-radius: 12px;
+}
+
+.ai-product-item img {
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.ai-product-item h4 {
+    margin: 0 0 8px;
+}
+
+.ai-price {
+    font-weight: 700;
+    color: #2c6b2f;
+}
+
+.ai-product-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.ai-message {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: #eef5ea;
+    color: #284d29;
+}
+
+.ai-error {
+    background: #fff1f1;
+    color: #9f2222;
+}
+
+/* ===== PRODUCTS GRID ===== */
+.products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.product {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    padding: 30px 20px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.product:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 18px rgba(0,0,0,0.12);
+}
+
+.product img {
+    max-width: 200px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+/* ===== PRODUCT TEXT ===== */
+.product h3 {
+    font-size: 22px;
+    margin: 15px 0;
+}
+
+.product p {
+    margin: 10px 0;
+    font-size: 15px;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    display: inline-block;
+    padding: 12px 22px;
+    font-size: 15px;
+    border-radius: 6px;
+    text-decoration: none;
+    margin: 8px 5px;
+    transition: all 0.3s;
+    cursor: pointer;
+    border: none;
+}
+
+/* Подробнее */
+a.btn {
+    background: #4CAF50;
+    color: white;
+}
+
+a.btn:hover {
+    background: #45a049;
+    transform: scale(1.05);
+}
+
+/* В корзину */
+button.add-to-cart {
+    background: #ff9800;
+    color: white;
+}
+
+button.add-to-cart:hover {
+    background: #e68900;
+    transform: scale(1.05);
+}
+
+.btn.add-to-cart i {
+    margin-right: 6px;
+}
+
+/* ===== FOOTER ===== */
+footer {
+    background: #2c6b2f;
+    color: white;
+    padding: 60px 20px;
+    margin-top: 60px;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 30px;
+}
+
+.footer-section h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.footer-section p, .footer-section ul {
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 10px;
+}
+
+.footer-section ul li a {
+    color: #a3d7a3;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-section ul li a:hover {
+    color: white;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #a3d7a3;
+    font-size: 14px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .section h1 {
+        font-size: 26px;
+    }
+
+    .product img {
+        max-width: 150px;
+    }
+
+    .ai-form-row,
+    .ai-result,
+    .ai-product-item {
+        grid-template-columns: 1fr;
+    }
+
+    .ai-product-item img {
+        width: 100%;
+        max-width: 220px;
+        height: auto;
+    }
+}

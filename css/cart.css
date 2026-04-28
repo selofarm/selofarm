@@ -1,0 +1,161 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f8f9fa;
+    color: #333;
+}
+
+.page-title {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #2c6b2f;
+}
+
+.message {
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+.message.error { background: #ffe5e5; color: #cc0000; }
+.message.success { background: #e5ffe5; color: #2c6b2f; }
+
+.section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+/* ================= КОРЗИНА ================= */
+.cart-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.cart-table th, .cart-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.cart-table th {
+    background: #4CAF50;
+    color: white;
+}
+
+.cart-img {
+    max-width: 50px;
+    border-radius: 5px;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+.remove-form {
+    margin: 0;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #45a049;
+}
+
+.btn.remove-from-cart {
+    background: #ff4444;
+    padding: 8px 15px;
+}
+
+.btn.remove-from-cart:hover {
+    background: #cc0000;
+}
+
+/* ================= ПУСТАЯ КОРЗИНА ================= */
+.empty-cart {
+    text-align: center;
+    font-size: 18px;
+    padding: 40px 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.empty-cart i {
+    font-size: 40px;
+    margin-bottom: 10px;
+    color: #999;
+}
+
+/* ================= ФОРМА ОФОРМЛЕНИЯ ================= */
+.checkout-form {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.checkout-form h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.checkout-form .input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 8px 10px;
+}
+
+.checkout-form .input-group i {
+    margin-right: 10px;
+    color: #4CAF50;
+}
+
+.checkout-form .input-group input {
+    border: none;
+    outline: none;
+    flex: 1;
+    font-size: 14px;
+}
+
+.checkout-form button {
+    width: 100%;
+    font-size: 16px;
+}
+
+/* ================= АДАПТИВ ================= */
+@media (max-width: 768px) {
+    .cart-table {
+        display: block;
+    }
+    .cart-table th {
+        display: none;
+    }
+    .cart-table tr {
+        display: block;
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    .cart-table td {
+        display: block;
+        text-align: center;
+    }
+}

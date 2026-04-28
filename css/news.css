@@ -1,0 +1,189 @@
+/* ====== БАЗА ====== */
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    background: #f8f9fa;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* футер внизу */
+}
+
+main { flex: 1; }
+
+/* ====== ХЕДЕР ====== */
+header {
+    background: #2c6b2f;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav .logo a {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+    padding: 0; margin: 0;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color .2s ease;
+}
+nav ul li a:hover { color: #a3d7a3; }
+
+/* ====== КОНТЕЙНЕР СТРАНИЦЫ ====== */
+.section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+}
+
+.section h1 {
+    margin: 0 0 24px 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+/* ====== СЕТКА НОВОСТЕЙ (FLEX) ====== */
+.news-grid {
+    display: flex !important;          /* форсим flex, если что-то перебивает */
+    flex-wrap: wrap;
+    gap: 24px;                          /* расстояние между карточками */
+    align-items: stretch;
+}
+
+/* Карточка занимает минимум 300px, дальше заполняет ряд.
+   На широких экранах получится 3-4 колонки, на планшете 2, на мобилке 1. */
+.news-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform .25s ease, box-shadow .25s ease;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 300px;                    /* ключ: ширина «колонки» */
+    max-width: 1fr;                     /* пусть растягивается в строке */
+    min-width: 280px;                   /* не сжимать меньше этого */
+}
+
+.news-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+}
+
+.news-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+.news-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;                            /* вытягиваем контент до низа */
+}
+
+.news-body h3 {
+    font-size: 20px;
+    margin: 6px 0 10px;
+    color: #2c3e50;
+}
+
+/* Ограничим анонс по строкам, чтобы карточки были ровнее */
+.news-body p {
+    font-size: 15px;
+    line-height: 1.55;
+    color: #444;
+    margin: 0 0 10px;
+    flex: 1;                            /* заполняет доступное место */
+    display: -webkit-box;
+    -webkit-line-clamp: 5;              /* ~5 строк */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.news-body .date {
+    color: #666;
+    font-size: 13px;
+    margin-top: auto;                    /* дата прижимается к низу карточки */
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ====== ФУТЕР ====== */
+footer {
+    background: #2c6b2f;
+    color: #fff;
+    padding: 40px 20px;
+    margin-top: auto;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+    gap: 20px;
+}
+
+.footer-section h3 {
+    font-size: 18px;
+    margin: 0 0 10px 0;
+}
+
+.footer-section p, .footer-section ul {
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.footer-section ul { list-style: none; padding: 0; }
+.footer-section ul li { margin-bottom: 8px; }
+.footer-section ul li a { color: #a3d7a3; text-decoration: none; }
+.footer-section ul li a:hover { text-decoration: underline; }
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.35);
+    font-size: 14px;
+}
+
+/* ====== АДАПТИВ ====== */
+@media (max-width: 900px) {
+    .news-img { height: 180px; }
+}
+
+@media (max-width: 600px) {
+    nav { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .news-card { flex: 1 1 100%; min-width: 100%; } /* одна колонка на узких */
+    .news-img { height: 170px; }
+}
