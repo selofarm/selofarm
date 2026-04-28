@@ -196,6 +196,11 @@ PROMPT;
         $generatedText = is_string($raw) ? $raw : '';
     }
 
+    return [
+        'ok' => false,
+        'error' => 'Debug: ' . substr($generatedText, 0, 500),
+    ];
+
     $recipe = extract_json_object($generatedText);
     if (!is_array($recipe)) {
         return [
