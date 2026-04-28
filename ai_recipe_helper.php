@@ -147,7 +147,7 @@ PROMPT;
             ['role' => 'system', 'content' => 'Ты помощник кулинарного магазина. Ответь строго в JSON без markdown и без пояснений.'],
             ['role' => 'user', 'content' => sprintf($prompt, build_products_prompt($products))],
         ],
-        'max_tokens' => 900,
+        'max_tokens' => 1500,
         'temperature' => 0.3,
     ];
 
@@ -188,18 +188,7 @@ PROMPT;
     if (is_array($decoded) && isset($decoded['choices'][0]['message']['content'])) {
         $generatedText = (string)$decoded['choices'][0]['message']['content'];
         $generatedText = preg_replace('/<think>.*?<\/think>/s', '', $generatedText);
-    } elseif (is_array($decoded) && isset($decoded[0]['generated_text'])) {
-        $generatedText = (string)$decoded[0]['generated_text'];
-    } elseif (is_array($decoded) && isset($decoded['generated_text'])) {
-        $generatedText = (string)$decoded['generated_text'];
-    } else {
-        $generatedText = is_string($raw) ? $raw : '';
     }
-
-    return [
-        'ok' => false,
-        'error' => 'Debug: ' . substr($generatedText, 0, 500),
-    ];
 
     $recipe = extract_json_object($generatedText);
     if (!is_array($recipe)) {
