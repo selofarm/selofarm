@@ -147,7 +147,7 @@ PROMPT;
             ['role' => 'system', 'content' => 'Ты помощник кулинарного магазина. Ответь строго в JSON без markdown и без пояснений.'],
             ['role' => 'user', 'content' => sprintf($prompt, build_products_prompt($products))],
         ],
-        'max_tokens' => 2000,
+        'max_tokens' => 3000,
         'temperature' => 0.3,
     ];
 
@@ -200,6 +200,9 @@ PROMPT;
     if ($pos !== false) {
         $text = substr($text, $pos);
     }
+
+    $text = preg_replace('/[\s\S]*(\{".+})$/s', '$1', $text);
+    $text = preg_replace('/\[\]$/', '', $text);
 
     $decoded = json_decode($text, true);
     if (is_array($decoded) && isset($decoded['title'])) {
