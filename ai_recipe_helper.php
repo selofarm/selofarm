@@ -190,18 +190,20 @@ PROMPT;
         $generatedText = preg_replace('/<think>.*?<\/think>/s', '', $generatedText);
     }
 
-    $recipe = extract_json_object($generatedText);
-    if (!is_array($recipe)) {
+    $text = trim($generatedText);
+    if ($text === '') {
+        return ['ok' => false, 'error' => 'Пустой ответ от модели'];
+    }
+
+    $decoded = json_decode($text, true);
+    if (is_array($decoded) && isset($decoded['title'])) {
         return [
-            'ok' => false,
-            'error' => 'Не удалось разобрать ответ модели. Проверьте формат ответа Hugging Face.',
+            'ok' => true,
+            'data' => normalize_recipe_data($decoded, $dishName),
         ];
     }
 
-    return [
-        'ok' => true,
-        'data' => normalize_recipe_data($recipe, $dishName),
-    ];
+    return ['ok' => false, 'error' => 'JSON не найден в: ' . substr($text, 0, 500)];
 }
 
 function find_products_for_recipe(array $products, array $recipeData, string $dishName): array
