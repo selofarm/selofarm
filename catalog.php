@@ -121,30 +121,7 @@ if (isset($_POST['generate_recipe'])) {
 
     <section class="ai-recipe-box">
         <p class="ai-kicker">ИИ-помощник</p>
-        <h2>Подобрать рецепт по блюду</h2>
-        <p class="ai-subtitle">Введите название блюда, и сайт сгенерирует рецепт через Hugging Face и покажет товары из базы, если они подходят.</p>
-
-        <form method="POST" class="ai-recipe-form" accept-charset="UTF-8">
-            <label for="dish_name">Название блюда</label>
-            <div class="ai-form-row">
-                <input
-                    type="text"
-                    id="dish_name"
-                    name="dish_name"
-                    value="<?= htmlspecialchars($aiDish, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
-                    placeholder="Например, борщ, сырники, шакшука"
-                    maxlength="120"
-                >
-                <button type="submit" name="generate_recipe" class="btn ai-submit">
-                    <i class="fas fa-robot"></i> Получить рецепт
-                </button>
-            </div>
-        </form>
-
-        <?php if ($aiError !== ''): ?>
-            <div class="ai-message ai-error"><?= htmlspecialchars($aiError, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></div>
-        <?php endif; ?>
-
+        
         <?php if (is_array($aiRecipe)): ?>
             <div class="ai-result">
                 <div class="ai-recipe-card">
@@ -213,6 +190,35 @@ if (isset($_POST['generate_recipe'])) {
                     <?php endif; ?>
                 </div>
             </div>
+            
+            <form method="GET" class="ai-recipe-form">
+                <button type="submit" class="btn">
+                    <i class="fas fa-utensils"></i> Попробовать другое блюдо
+                </button>
+            </form>
+        <?php else: ?>
+            <h2>Подобрать рецепт по блюду</h2>
+            <p class="ai-subtitle">Введите название блюда, и сайт сгенерирует рецепт через Hugging Face и покажет товары из базы, если они подходят.</p>
+
+            <form method="POST" class="ai-recipe-form" accept-charset="UTF-8">
+                <label for="dish_name">Название блюда</label>
+                <div class="ai-form-row">
+                    <input
+                        type="text"
+                        id="dish_name"
+                        name="dish_name"
+                        placeholder="Например, борщ, сырники, шакшука"
+                        maxlength="120"
+                    >
+                    <button type="submit" name="generate_recipe" class="btn ai-submit">
+                        <i class="fas fa-robot"></i> Получить рецепт
+                    </button>
+                </div>
+            </form>
+
+            <?php if ($aiError !== ''): ?>
+                <div class="ai-message ai-error"><?= htmlspecialchars($aiError, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></div>
+            <?php endif; ?>
         <?php endif; ?>
     </section>
 
