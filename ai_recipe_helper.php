@@ -144,7 +144,7 @@ PROMPT;
     $payload = [
         'model' => 'deepseek-ai/DeepSeek-R1',
         'messages' => [
-            ['role' => 'system', 'content' => $systemPrompt],
+            ['role' => 'system', 'content' => 'Ты помощник кулинарного магазина. Ответь строго в JSON без markdown и без пояснений.'],
             ['role' => 'user', 'content' => sprintf($prompt, build_products_prompt($products))],
         ],
         'max_tokens' => 900,
