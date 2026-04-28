@@ -1,15 +1,15 @@
-﻿<?php
+<?php
 session_start();
 require_once __DIR__ . '/db.php';
 
-/* =====================[ BASE_URL Рё Р°СЃСЃРµС‚С‹ ]================ */
-$BASE_URL = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'); // '' РёР»Рё '/selo'
+/* =====================[ BASE_URL и ассеты ]================ */
+$BASE_URL = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'); // '' или '/selo'
 function asset_url(string $path): string {
     global $BASE_URL;
     return $BASE_URL . '/' . ltrim($path, '/');
 }
 
-/* =====================[ РҐРµР»РїРµСЂ: РєРѕСЂСЂРµРєС‚РЅС‹Р№ src РґР»СЏ img ]=== */
+/* =====================[ Хелпер: корректный src для img ]=== */
 function image_src($image): string {
     if (is_string($image) && (str_starts_with($image, 'data:') || str_starts_with($image, 'http'))) {
         return $image;
@@ -39,22 +39,22 @@ function image_src($image): string {
     return asset_url('images/no-image.jpg');
 }
 
-/* =====================[ РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєРѕСЂР·РёРЅС‹ ]============ */
+/* =====================[ Инициализация корзины ]============ */
 if (!isset($_SESSION['cart'])) {
     // cart[product_id] = ['id','name','price','image','quantity']
     $_SESSION['cart'] = [];
 }
 
-/* =====================[ РЈРґР°Р»РµРЅРёРµ РїРѕР·РёС†РёРё ]================= */
+/* =====================[ Удаление позиции ]================= */
 if (isset($_POST['remove_item'])) {
     $pid = (int)($_POST['product_id'] ?? 0);
     if (isset($_SESSION['cart'][$pid])) {
         unset($_SESSION['cart'][$pid]);
-        $success = "РџРѕР·РёС†РёСЏ СѓРґР°Р»РµРЅР° РёР· РєРѕСЂР·РёРЅС‹.";
+        $success = "Позиция удалена из корзины.";
     }
 }
 
-/* =====================[ РћР±РЅРѕРІР»РµРЅРёРµ РєРѕР»РёС‡РµСЃС‚РІР° ]============ */
+/* =====================[ Обновление количества ]============ */
 if (isset($_POST['update_qty'])) {
     foreach ((array)($_POST['qty'] ?? []) as $pid => $qty) {
         $pid = (int)$pid;
@@ -63,17 +63,17 @@ if (isset($_POST['update_qty'])) {
             $_SESSION['cart'][$pid]['quantity'] = $q;
         }
     }
-    $success = "РљРѕР»РёС‡РµСЃС‚РІРѕ РѕР±РЅРѕРІР»РµРЅРѕ.";
+    $success = "Количество обновлено.";
 }
 
-/* =====================[ РћС„РѕСЂРјР»РµРЅРёРµ Р·Р°РєР°Р·Р° ]================
-   РЈ РІР°СЃ РІ orders:
-     - РµСЃС‚СЊ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕРµ РїРѕР»Рµ user_id (Р±РµР· default),
-     - СЃС‚Р°С‚СѓСЃ ENUM('Open','Processed','Completed','Canceled').
+/* =====================[ Оформление заказа ]================
+   У вас в orders:
+     - есть обязательное поле user_id (без default),
+     - статус ENUM('Open','Processed','Completed','Canceled').
 
-   Р РµС€РµРЅРёРµ:
-     - Р±РµСЂС‘Рј user_id РёР· $_SESSION['user_id'] РёР»Рё СЃС‚Р°РІРёРј 0 (РіРѕСЃС‚СЊ),
-     - СЃС‚Р°С‚СѓСЃ РїРёС€РµРј 'Open'.
+   Решение:
+     - берём user_id из $_SESSION['user_id'] или ставим 0 (гость),
+     - статус пишем 'Open'.
 */
 if (isset($_POST['checkout'])) {
     $first_name       = trim($_POST['first_name'] ?? '');
@@ -82,17 +82,17 @@ if (isset($_POST['checkout'])) {
     $shipping_address = trim($_POST['shipping_address'] ?? '');
 
     if ($first_name === '' || $last_name === '' || $phone === '' || $shipping_address === '') {
-        $error = "РџРѕР¶Р°Р»СѓР№СЃС‚Р°, Р·Р°РїРѕР»РЅРёС‚Рµ РІСЃРµ РїРѕР»СЏ Р·Р°РєР°Р·Р°.";
+        $error = "Пожалуйста, заполните все поля заказа.";
     } elseif (empty($_SESSION['cart'])) {
-        $error = "РљРѕСЂР·РёРЅР° РїСѓСЃС‚Р°.";
+        $error = "Корзина пуста.";
     } else {
-        // Р•СЃР»Рё Сѓ РІР°СЃ РµСЃС‚СЊ Р°РІС‚РѕСЂРёР·Р°С†РёСЏ вЂ” РїРѕР»РѕР¶РёС‚Рµ С‚СѓРґР° СЂРµР°Р»СЊРЅС‹Р№ id РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
-        $userId = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0; // 0 = РіРѕСЃС‚СЊ
+        // Если у вас есть авторизация — положите туда реальный id пользователя
+        $userId = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0; // 0 = гость
 
         try {
             $conn->beginTransaction();
 
-            // 1) РЎРѕР·РґР°С‘Рј Р·Р°РєР°Р· (РІСЃС‚Р°РІР»СЏРµРј user_id Рё status='Open')
+            // 1) Создаём заказ (вставляем user_id и status='Open')
             $stmt = $conn->prepare("
                 INSERT INTO orders (user_id, first_name, last_name, phone, shipping_address, order_date, status)
                 VALUES (:uid, :fn, :ln, :ph, :addr, NOW(), :st)
@@ -103,11 +103,11 @@ if (isset($_POST['checkout'])) {
                 ':ln'   => $last_name,
                 ':ph'   => $phone,
                 ':addr' => $shipping_address,
-                ':st'   => 'Open', // СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ РІР°С€РµРјСѓ ENUM
+                ':st'   => 'Open', // соответствует вашему ENUM
             ]);
             $order_id = (int)$conn->lastInsertId();
 
-            // 2) РџРёС€РµРј РїРѕР·РёС†РёРё
+            // 2) Пишем позиции
             $itemStmt = $conn->prepare("
                 INSERT INTO order_items (order_id, product_id, quantity, price)
                 VALUES (:oid, :pid, :qty, :price)
@@ -122,18 +122,18 @@ if (isset($_POST['checkout'])) {
             }
 
             $conn->commit();
-            $_SESSION['cart'] = []; // РѕС‡РёСЃС‚РёС‚СЊ РєРѕСЂР·РёРЅСѓ
-            $success = "Р—Р°РєР°Р· РѕС„РѕСЂРјР»РµРЅ! РќРѕРјРµСЂ Р·Р°РєР°Р·Р°: #{$order_id}";
+            $_SESSION['cart'] = []; // очистить корзину
+            $success = "Заказ оформлен! Номер заказа: #{$order_id}";
         } catch (Exception $ex) {
             if ($conn->inTransaction()) {
                 $conn->rollBack();
             }
-            $error = "РћС€РёР±РєР° РїСЂРё РѕС„РѕСЂРјР»РµРЅРёРё Р·Р°РєР°Р·Р°: " . $ex->getMessage();
+            $error = "Ошибка при оформлении заказа: " . $ex->getMessage();
         }
     }
 }
 
-/* =====================[ Р”Р°РЅРЅС‹Рµ РєРѕСЂР·РёРЅС‹ РґР»СЏ РІС‹РІРѕРґР° ]======== */
+/* =====================[ Данные корзины для вывода ]======== */
 $cart_items = [];
 $total = 0.0;
 foreach ($_SESSION['cart'] as $id => $it) {
@@ -154,7 +154,7 @@ foreach ($_SESSION['cart'] as $id => $it) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>РљРѕСЂР·РёРЅР°</title>
+    <title>Корзина</title>
     <link rel="stylesheet" href="<?= asset_url('css/cart.css') ?>">
     <link rel="stylesheet" href="<?= asset_url('css/catalog.css') ?>">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
@@ -165,7 +165,7 @@ foreach ($_SESSION['cart'] as $id => $it) {
 <?php include "header.php"; ?>
 
 <div class="section">
-    <h1 class="page-title"><i class="fas fa-shopping-cart"></i> Р’Р°С€Р° РєРѕСЂР·РёРЅР°</h1>
+    <h1 class="page-title"><i class="fas fa-shopping-cart"></i> Ваша корзина</h1>
 
     <?php if (!empty($error)): ?>
         <p class="message error"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?></p>
@@ -177,43 +177,43 @@ foreach ($_SESSION['cart'] as $id => $it) {
     <?php if (empty($cart_items)): ?>
         <div class="empty-cart">
             <i class="fas fa-shopping-basket"></i>
-            <p>Р’Р°С€Р° РєРѕСЂР·РёРЅР° РїСѓСЃС‚Р°</p>
-            <a href="catalog.php" class="btn"><i class="fas fa-arrow-left"></i> Р’РµСЂРЅСѓС‚СЊСЃСЏ Рє РєР°С‚Р°Р»РѕРіСѓ</a>
+            <p>Ваша корзина пуста</p>
+            <a href="catalog.php" class="btn"><i class="fas fa-arrow-left"></i> Вернуться к каталогу</a>
         </div>
     <?php else: ?>
         <form method="POST">
             <table class="cart-table">
                 <tr>
-                    <th>РўРѕРІР°СЂ</th>
-                    <th>Р¦РµРЅР°</th>
-                    <th>РљРѕР»РёС‡РµСЃС‚РІРѕ</th>
-                    <th>РС‚РѕРіРѕ</th>
-                    <th>Р”РµР№СЃС‚РІРёРµ</th>
+                    <th>Товар</th>
+                    <th>Цена</th>
+                    <th>Количество</th>
+                    <th>Итого</th>
+                    <th>Действие</th>
                 </tr>
                 <?php foreach ($cart_items as $item): ?>
                     <tr>
                         <td class="cart-item-title">
-                            <img src="<?= htmlspecialchars(image_src($item['image'])) ?>" class="cart-img" alt="РўРѕРІР°СЂ">
+                            <img src="<?= htmlspecialchars(image_src($item['image'])) ?>" class="cart-img" alt="Товар">
                             <?= htmlspecialchars($item['name']) ?>
                         </td>
-                        <td><?= number_format($item['price'], 2, '.', ' ') ?> СЂСѓР±.</td>
+                        <td><?= number_format($item['price'], 2, '.', ' ') ?> руб.</td>
                         <td>
                             <input type="number" name="qty[<?= (int)$item['id'] ?>]" min="1" value="<?= (int)$item['quantity'] ?>" style="width:80px">
                         </td>
-                        <td><?= number_format($item['subtotal'], 2, '.', ' ') ?> СЂСѓР±.</td>
+                        <td><?= number_format($item['subtotal'], 2, '.', ' ') ?> руб.</td>
                         <td>
                             <button type="submit" name="remove_item" value="1" class="btn remove-from-cart"
                                     onclick="this.form.product_id.value='<?= (int)$item['id'] ?>'">
-                                <i class="fas fa-trash"></i> РЈРґР°Р»РёС‚СЊ
+                                <i class="fas fa-trash"></i> Удалить
                             </button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
                 <tr>
-                    <td colspan="3" style="text-align:right"><strong>РћР±С‰Р°СЏ СЃСѓРјРјР°:</strong></td>
-                    <td><strong><?= number_format($total, 2, '.', ' ') ?> СЂСѓР±.</strong></td>
+                    <td colspan="3" style="text-align:right"><strong>Общая сумма:</strong></td>
+                    <td><strong><?= number_format($total, 2, '.', ' ') ?> руб.</strong></td>
                     <td style="text-align:right">
-                        <button type="submit" name="update_qty" value="1" class="btn"><i class="fas fa-sync"></i> РћР±РЅРѕРІРёС‚СЊ</button>
+                        <button type="submit" name="update_qty" value="1" class="btn"><i class="fas fa-sync"></i> Обновить</button>
                     </td>
                 </tr>
             </table>
@@ -221,24 +221,24 @@ foreach ($_SESSION['cart'] as $id => $it) {
         </form>
 
         <form method="POST" class="checkout-form" style="margin-top:24px">
-            <h3><i class="fas fa-truck"></i> РћС„РѕСЂРјР»РµРЅРёРµ Р·Р°РєР°Р·Р°</h3>
+            <h3><i class="fas fa-truck"></i> Оформление заказа</h3>
             <div class="input-group">
                 <i class="fas fa-user"></i>
-                <input type="text" name="first_name" placeholder="РРјСЏ" required>
+                <input type="text" name="first_name" placeholder="Имя" required>
             </div>
             <div class="input-group">
                 <i class="fas fa-user"></i>
-                <input type="text" name="last_name" placeholder="Р¤Р°РјРёР»РёСЏ" required>
+                <input type="text" name="last_name" placeholder="Фамилия" required>
             </div>
             <div class="input-group">
                 <i class="fas fa-phone"></i>
-                <input type="text" name="phone" placeholder="РўРµР»РµС„РѕРЅ" required>
+                <input type="text" name="phone" placeholder="Телефон" required>
             </div>
             <div class="input-group">
                 <i class="fas fa-map-marker-alt"></i>
-                <input type="text" name="shipping_address" placeholder="РђРґСЂРµСЃ РґРѕСЃС‚Р°РІРєРё" required>
+                <input type="text" name="shipping_address" placeholder="Адрес доставки" required>
             </div>
-            <button type="submit" name="checkout" class="btn"><i class="fas fa-credit-card"></i> РћС„РѕСЂРјРёС‚СЊ Р·Р°РєР°Р·</button>
+            <button type="submit" name="checkout" class="btn"><i class="fas fa-credit-card"></i> Оформить заказ</button>
         </form>
     <?php endif; ?>
 </div>

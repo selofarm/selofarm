@@ -1,8 +1,8 @@
-﻿<?php
+<?php
 session_start();
 require_once __DIR__ . '/db.php';
 
-// РћР±СЂР°Р±РѕС‚РєР° РґРѕР±Р°РІР»РµРЅРёСЏ РІ РєРѕСЂР·РёРЅСѓ
+// Обработка добавления в корзину
 if (isset($_POST['add_to_cart'])) {
     $product_id = (int)$_POST['product_id'];
     $stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
@@ -49,29 +49,29 @@ $product = $stmt->fetch();
         <div class="product-details">
     <?php if (!empty($product['image'])): ?>
         <?php if (strlen($product['image']) > 200): ?> 
-            <!-- РЎРєРѕСЂРµРµ РІСЃРµРіРѕ СЌС‚Рѕ BLOB -->
+            <!-- Скорее всего это BLOB -->
             <img src="data:image/jpeg;base64,<?= base64_encode($product['image']) ?>" alt="product" class="product-img">
         <?php else: ?> 
-            <!-- РЎРєРѕСЂРµРµ РІСЃРµРіРѕ СЌС‚Рѕ РїСѓС‚СЊ -->
+            <!-- Скорее всего это путь -->
             <img src="<?= htmlspecialchars($product['image']) ?>" alt="product" class="product-img">
         <?php endif; ?>
     <?php else: ?>
-        <!-- Р—Р°РіР»СѓС€РєР° РµСЃР»Рё РєР°СЂС‚РёРЅРєРё РЅРµС‚ -->
-        <img src="img/no-image.jpg" alt="РќРµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ" class="product-img">
+        <!-- Заглушка если картинки нет -->
+        <img src="img/no-image.jpg" alt="Нет изображения" class="product-img">
     <?php endif; ?>
 
     <div class="product-info">
         <h1><?= htmlspecialchars($product['name']) ?></h1>
-        <p class="price">Р¦РµРЅР°: <?= htmlspecialchars($product['price']) ?> СЂСѓР±.</p>
+        <p class="price">Цена: <?= htmlspecialchars($product['price']) ?> руб.</p>
         <p><?= htmlspecialchars($product['description']) ?></p>
         <form method="POST">
             <input type="hidden" name="product_id" value="<?= $product['id']; ?>">
             <button type="submit" name="add_to_cart" class="btn add-to-cart">
-                <i class="fas fa-cart-plus"></i> Р”РѕР±Р°РІРёС‚СЊ РІ РєРѕСЂР·РёРЅСѓ
+                <i class="fas fa-cart-plus"></i> Добавить в корзину
             </button>
         </form>
         <a href="catalog.php" class="btn back-btn">
-            <i class="fas fa-arrow-left"></i> РќР°Р·Р°Рґ Рє РєР°С‚Р°Р»РѕРіСѓ
+            <i class="fas fa-arrow-left"></i> Назад к каталогу
         </a>
     </div>
 </div>

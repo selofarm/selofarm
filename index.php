@@ -1,4 +1,5 @@
-﻿<?php
+<?php
+header('Content-Type: text/html; charset=UTF-8');
 session_start();
 require_once __DIR__ . '/db.php';
 ?>
@@ -7,7 +8,7 @@ require_once __DIR__ . '/db.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>РџСЂРѕРґР°Р¶Р° СЃРµР»СЊС…РѕР·РїСЂРѕРґСѓРєС†РёРё</title>
+    <title>Продажа сельхозпродукции</title>
     <link rel="stylesheet" href="css/index.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -17,18 +18,18 @@ require_once __DIR__ . '/db.php';
 
     <div class="banner">
         <div class="banner-content">
-            <h1>Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ РІ РЅР°С€Рµ С„РµСЂРјРµСЂСЃРєРѕРµ С…РѕР·СЏР№СЃС‚РІРѕ!</h1>
-            <p>РЎРІРµР¶РёРµ Рё РЅР°С‚СѓСЂР°Р»СЊРЅС‹Рµ РїСЂРѕРґСѓРєС‚С‹ РїСЂСЏРјРѕ СЃ РїРѕР»РµР№!</p>
+            <h1>Добро пожаловать в наше фермерское хозяйство!</h1>
+            <p>Свежие и натуральные продукты прямо с полей!</p>
         </div>
     </div>
 
     <div class="section">
-        <h2>Рћ РЅР°СЃ</h2>
-        <p>РњС‹ - С„РµСЂРјРµСЂСЃРєРѕРµ С…РѕР·СЏР№СЃС‚РІРѕ, РїРѕСЃС‚Р°РІР»СЏСЋС‰РµРµ СЃРІРµР¶СѓСЋ СЃРµР»СЊС…РѕР·РїСЂРѕРґСѓРєС†РёСЋ РїСЂСЏРјРѕ СЃ РїРѕР»РµР№. РќР°С€Р° РјРёСЃСЃРёСЏ - РѕР±РµСЃРїРµС‡РёС‚СЊ РІР°СЃ РєР°С‡РµСЃС‚РІРµРЅРЅС‹РјРё РїСЂРѕРґСѓРєС‚Р°РјРё РїРѕ РґРѕСЃС‚СѓРїРЅС‹Рј С†РµРЅР°Рј.</p>
+        <h2>О нас</h2>
+        <p>Мы - фермерское хозяйство, поставляющее свежую сельхозпродукцию прямо с полей. Наша миссия - обеспечить вас качественными продуктами по доступным ценам.</p>
     </div>
 
     <div class="section">
-        <h2>РҐРёС‚С‹ РїСЂРѕРґР°Р¶</h2>
+        <h2>Хиты продаж</h2>
         <div class="products">
         <?php
         try {
@@ -37,19 +38,19 @@ require_once __DIR__ . '/db.php';
                 echo "<div class='product'>";
                 echo "<img src='" . htmlspecialchars($row['image']) . "' alt='product'>";
                 echo "<h3>" . htmlspecialchars($row['name']) . "</h3>";
-                echo "<p>Р¦РµРЅР°: " . htmlspecialchars($row['price']) . " СЂСѓР±.</p>";
-                echo "<a href='product.php?id=" . (int)$row['id'] . "' class='btn'>РџРѕРґСЂРѕР±РЅРµРµ</a>";
+                echo "<p>Цена: " . htmlspecialchars($row['price']) . " руб.</p>";
+                echo "<a href='product.php?id=" . (int)$row['id'] . "' class='btn'>Подробнее</a>";
                 echo "</div>";
             }
         } catch (Throwable $e) {
-            echo "<p style='color:#b00'>РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ С‚РѕРІР°СЂС‹.</p>";
+            echo "<p style='color:#b00'>Не удалось загрузить товары.</p>";
         }
         ?>
         </div>
     </div>
 
     <div class="section">
-        <h2>РќРѕРІРѕСЃС‚Рё</h2>
+        <h2>Новости</h2>
         <?php
         try {
             $stmt = $conn->query("SELECT * FROM news ORDER BY date DESC LIMIT 2");
@@ -61,17 +62,17 @@ require_once __DIR__ . '/db.php';
                 echo "</div>";
             }
         } catch (Throwable $e) {
-            echo "<p style='color:#b00'>РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ РЅРѕРІРѕСЃС‚Рё.</p>";
+            echo "<p style='color:#b00'>Не удалось загрузить новости.</p>";
         }
         ?>
     </div>
 
-    <!-- ==== РћРўР—Р«Р’Р« РџРћРљРЈРџРђРўР•Р›Р•Р™ ==== -->
+    <!-- ==== ОТЗЫВЫ ПОКУПАТЕЛЕЙ ==== -->
     <div class="section" id="reviews" style="scroll-margin-top: 80px;">
-        <h2>РћС‚Р·С‹РІС‹ РїРѕРєСѓРїР°С‚РµР»РµР№</h2>
+        <h2>Отзывы покупателей</h2>
 
         <?php
-        // Р“СЂСѓР·РёРј РїРѕСЃР»РµРґРЅРёРµ 5 РўРћР›Р¬РљРћ РћР”РћР‘Р Р•РќРќР«РҐ РѕС‚Р·С‹РІРѕРІ
+        // Грузим последние 5 ТОЛЬКО ОДОБРЕННЫХ отзывов
         try {
             $stmt = $conn->query("
                 SELECT name, rating, text, created_at
@@ -83,7 +84,7 @@ require_once __DIR__ . '/db.php';
             $reviews = $stmt->fetchAll();
         } catch (Throwable $e) {
             $reviews = [];
-            echo "<p style='color:#b00'>РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ РѕС‚Р·С‹РІС‹. РЈР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ СЃРѕР·РґР°РЅР° С‚Р°Р±Р»РёС†Р° <code>reviews</code>.</p>";
+            echo "<p style='color:#b00'>Не удалось загрузить отзывы. Убедитесь, что создана таблица <code>reviews</code>.</p>";
         }
         ?>
 
@@ -93,10 +94,10 @@ require_once __DIR__ . '/db.php';
                     <div class="review" style="border:1px solid #eee; border-radius:12px; padding:14px;">
                         <div style="display:flex; align-items:center; justify-content:space-between;">
                             <strong><?php echo htmlspecialchars($r['name']); ?></strong>
-                            <span aria-label="Р РµР№С‚РёРЅРі" title="РћС†РµРЅРєР°">
+                            <span aria-label="Рейтинг" title="Оценка">
                                 <?php
                                     $stars = max(1, min(5, (int)$r['rating']));
-                                    echo str_repeat('в…', $stars) . str_repeat('в†', 5 - $stars);
+                                    echo str_repeat('★', $stars) . str_repeat('☆', 5 - $stars);
                                 ?>
                             </span>
                         </div>
@@ -105,38 +106,38 @@ require_once __DIR__ . '/db.php';
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <p>РџРѕРєР° РЅРµС‚ РѕС‚Р·С‹РІРѕРІ. Р‘СѓРґСЊС‚Рµ РїРµСЂРІС‹Рј!</p>
+                <p>Пока нет отзывов. Будьте первым!</p>
             <?php endif; ?>
         </div>
 
-        <h3>РћСЃС‚Р°РІРёС‚СЊ РѕС‚Р·С‹РІ</h3>
+        <h3>Оставить отзыв</h3>
         <?php if (!empty($_GET['review_error'])): ?>
-            <p style="color:#b00;">РџСЂРѕРІРµСЂСЊС‚Рµ РїРѕР»СЏ С„РѕСЂРјС‹: РёРјСЏ, РѕС†РµРЅРєР° (1вЂ“5), С‚РµРєСЃС‚.</p>
+            <p style="color:#b00;">Проверьте поля формы: имя, оценка (1–5), текст.</p>
         <?php elseif (!empty($_GET['review_ok'])): ?>
-            <p style="color:#0a0;">РЎРїР°СЃРёР±Рѕ! Р’Р°С€ РѕС‚Р·С‹РІ РѕС‚РїСЂР°РІР»РµРЅ Рё РїРѕСЏРІРёС‚СЃСЏ РїРѕСЃР»Рµ РјРѕРґРµСЂР°С†РёРё.</p>
+            <p style="color:#0a0;">Спасибо! Ваш отзыв отправлен и появится после модерации.</p>
         <?php endif; ?>
 
         <form action="submit_review.php" method="post" style="display:grid; gap:10px; max-width:520px;">
-            <input type="text" name="name" placeholder="Р’Р°С€Рµ РёРјСЏ" required style="padding:10px; border-radius:10px; border:1px solid #ddd;">
+            <input type="text" name="name" placeholder="Ваше имя" required style="padding:10px; border-radius:10px; border:1px solid #ddd;">
             <select name="rating" required style="padding:10px; border-radius:10px; border:1px solid #ddd;">
-                <option value="">РћС†РµРЅРєР°</option>
-                <option value="5">5 вЂ” РћС‚Р»РёС‡РЅРѕ</option>
-                <option value="4">4 вЂ” РҐРѕСЂРѕС€Рѕ</option>
-                <option value="3">3 вЂ” РќРѕСЂРјР°Р»СЊРЅРѕ</option>
-                <option value="2">2 вЂ” РџР»РѕС…Рѕ</option>
-                <option value="1">1 вЂ” РћС‡РµРЅСЊ РїР»РѕС…Рѕ</option>
+                <option value="">Оценка</option>
+                <option value="5">5 — Отлично</option>
+                <option value="4">4 — Хорошо</option>
+                <option value="3">3 — Нормально</option>
+                <option value="2">2 — Плохо</option>
+                <option value="1">1 — Очень плохо</option>
             </select>
-            <textarea name="text" rows="4" placeholder="Р’Р°С€ РѕС‚Р·С‹РІ" required style="padding:10px; border-radius:10px; border:1px solid #ddd;"></textarea>
+            <textarea name="text" rows="4" placeholder="Ваш отзыв" required style="padding:10px; border-radius:10px; border:1px solid #ddd;"></textarea>
 
-            <!-- honeypot: РґРѕР»Р¶РЅРѕ РѕСЃС‚Р°РІР°С‚СЊСЃСЏ РїСѓСЃС‚С‹Рј -->
+            <!-- honeypot: должно оставаться пустым -->
             <input type="text" name="company" autocomplete="off"
                    style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden"
                    tabindex="-1">
 
-            <button type="submit" class="btn" style="padding:12px 14px; border-radius:12px; border:0; background:#2a7a2e; color:#fff; font-weight:600; cursor:pointer;">РћС‚РїСЂР°РІРёС‚СЊ РѕС‚Р·С‹РІ</button>
+            <button type="submit" class="btn" style="padding:12px 14px; border-radius:12px; border:0; background:#2a7a2e; color:#fff; font-weight:600; cursor:pointer;">Отправить отзыв</button>
         </form>
     </div>
-    <!-- ==== /РћРўР—Р«Р’Р« ==== -->
+    <!-- ==== /ОТЗЫВЫ ==== -->
 
     <?php include 'footer.php'; ?>
 </body>

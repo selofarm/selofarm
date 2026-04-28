@@ -45,7 +45,9 @@ function database_config(): array
         'host' => env_value('DB_HOST', $urlConfig['host'] ?? '127.0.0.1'),
         'port' => env_value('DB_PORT', $urlConfig['port'] ?? '3306'),
         'name' => env_value('DB_NAME', $urlConfig['name'] ?? ''),
-        'user' => env_value('DB_USER', $urlConfig['user'] ?? ''),
+        'user' => env_value('DB_USER')
+            ?? env_value('DB_USERNAME')
+            ?? ($urlConfig['user'] ?? ''),
         'password' => env_value('DB_PASSWORD')
             ?? env_value('DB_PASS')
             ?? ($urlConfig['password'] ?? ''),
@@ -77,8 +79,21 @@ function create_pdo(): PDO
 {
     $config = database_config();
 
-    if ($config['name'] === '' || $config['user'] === '') {
-        throw new RuntimeException('Не заданы переменные окружения подключения к БД.');
+    $missing = [];
+    if ($config['host'] === '') {
+        $missing[] = 'DB_HOST';
+    }
+    if ($config['name'] === '') {
+        $missing[] = 'DB_NAME';
+    }
+    if ($config['user'] === '') {
+        $missing[] = 'DB_USER';
+    }
+
+    if ($missing !== []) {
+        throw new RuntimeException(
+            'Не заданы переменные окружения подключения к БД: ' . implode(', ', $missing)
+        );
     }
 
     $dsn = sprintf(
