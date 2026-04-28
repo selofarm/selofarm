@@ -142,19 +142,16 @@ function request_hf_recipe(string $dishName, array $products): array
 PROMPT;
 
     $payload = [
-        'inputs' => sprintf($prompt, build_products_prompt($products)),
-        'parameters' => [
-            'max_new_tokens' => 900,
-            'temperature' => 0.3,
-            'return_full_text' => false,
+        'model' => 'deepseek-ai/DeepSeek-R1',
+        'messages' => [
+            ['role' => 'system', 'content' => $systemPrompt],
+            ['role' => 'user', 'content' => sprintf($prompt, build_products_prompt($products))],
         ],
-        'options' => [
-            'wait_for_model' => true,
-            'use_cache' => false,
-        ],
+        'max_tokens' => 900,
+        'temperature' => 0.3,
     ];
 
-    $ch = curl_init('https://api-inference.huggingface.co/models/Qwen/Qwen2.5-3B-Instruct');
+    $ch = curl_init('https://router.huggingface.co/v1/chat/completions');
     curl_setopt_array($ch, [
         CURLOPT_POST => true,
         CURLOPT_HTTPHEADER => [
@@ -188,7 +185,10 @@ PROMPT;
     }
 
     $generatedText = '';
-    if (is_array($decoded) && isset($decoded[0]['generated_text'])) {
+    if (is_array($decoded) && isset($decoded['choices'][0]['message']['content'])) {
+        $generatedText = (string)$decoded['choices'][0]['message']['content'];
+        $generatedText = preg_replace('/<think>.*?<\/think>/s', '', $generatedText);
+    } elseif (is_array($decoded) && isset($decoded[0]['generated_text'])) {
         $generatedText = (string)$decoded[0]['generated_text'];
     } elseif (is_array($decoded) && isset($decoded['generated_text'])) {
         $generatedText = (string)$decoded['generated_text'];
