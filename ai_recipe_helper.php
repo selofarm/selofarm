@@ -154,7 +154,7 @@ PROMPT;
         ],
     ];
 
-    $ch = curl_init('https://api-inference.huggingface.co/models/deepseek-ai/DeepSeek-R1');
+    $ch = curl_init('https://api-inference.huggingface.co/models/Qwen/Qwen2.5-3B-Instruct');
     curl_setopt_array($ch, [
         CURLOPT_POST => true,
         CURLOPT_HTTPHEADER => [

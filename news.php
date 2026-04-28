@@ -24,7 +24,7 @@ require_once __DIR__ . '/db.php';
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             ?>
             <div class="news-card">
-                <?php
+<?php
                 if (!empty($row['image'])) {
                     if (strlen($row['image']) > 200) {
                         $imgSrc = "data:image/jpeg;base64," . base64_encode($row['image']);
