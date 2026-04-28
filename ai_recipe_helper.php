@@ -78,8 +78,8 @@ function extract_json_object(string $text): ?array
         }
     }
 
-    if (preg_match('/(\{.*\})/su', $text, $matches)) {
-        $decoded = json_decode($matches[1], true);
+    if (preg_match('/\{.+\}/su', $text, $matches)) {
+        $decoded = json_decode($matches[0], true);
         if (is_array($decoded)) {
             return $decoded;
         }
@@ -189,11 +189,6 @@ PROMPT;
         $generatedText = (string)$decoded['choices'][0]['message']['content'];
         $generatedText = preg_replace('/<think>.*?<\/think>/s', '', $generatedText);
     }
-
-    return [
-        'ok' => false,
-        'error' => 'Raw: ' . substr($generatedText, 0, 1000),
-    ];
 
     $recipe = extract_json_object($generatedText);
     if (!is_array($recipe)) {
