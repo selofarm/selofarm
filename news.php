@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 require_once __DIR__ . '/db.php';
 ?>
@@ -8,7 +8,7 @@ require_once __DIR__ . '/db.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>РќРѕРІРѕСЃС‚Рё Рё Р°РєС†РёРё</title>
+    <title>Новости и акции</title>
     <link rel="stylesheet" href="css/news.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -17,7 +17,7 @@ require_once __DIR__ . '/db.php';
     <?php include 'header.php'; ?>
 
     <main class="section">
-        <h1>РќРѕРІРѕСЃС‚Рё Рё Р°РєС†РёРё</h1>
+        <h1>Новости и акции</h1>
         <div class="news-grid">
         <?php
         $stmt = $conn->query("SELECT * FROM news ORDER BY date DESC");
@@ -31,7 +31,7 @@ require_once __DIR__ . '/db.php';
                     } else {
                         $imgSrc = htmlspecialchars($row['image']);
                     }
-                    echo "<img src='{$imgSrc}' alt='РќРѕРІРѕСЃС‚СЊ' class='news-img'>";
+                    echo "<img src='{$imgSrc}' alt='Новость' class='news-img'>";
                 }
                 ?>
                 <div class="news-body">
