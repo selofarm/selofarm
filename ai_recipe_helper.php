@@ -191,17 +191,14 @@ PROMPT;
 
     $text = trim($generatedText);
     if ($text === '') {
-        return ['ok' => false, 'error' => 'Пустой ответ от модели'];
+        return ['ok' => false, 'error' => 'Пустой ответ'];
     }
+
+    $text = preg_replace('/<think>.*?<\/think>/s', '', $text);
 
     $pos = strpos($text, '{');
     if ($pos !== false) {
         $text = substr($text, $pos);
-    }
-
-    $decoded = json_decode($text, true);
-    if ($text === '') {
-        return ['ok' => false, 'error' => 'Пустой ответ от модели'];
     }
 
     $decoded = json_decode($text, true);
@@ -212,7 +209,7 @@ PROMPT;
         ];
     }
 
-    return ['ok' => false, 'error' => 'JSON не найден в: ' . substr($text, 0, 500)];
+    return ['ok' => false, 'error' => 'JSON err: ' . json_last_error_msg() . ' | Text: ' . substr($text, 0, 200)];
 }
 
 function find_products_for_recipe(array $products, array $recipeData, string $dishName): array
