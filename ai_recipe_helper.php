@@ -187,10 +187,19 @@ PROMPT;
     $generatedText = '';
     if (is_array($decoded) && isset($decoded['choices'][0]['message']['content'])) {
         $generatedText = (string)$decoded['choices'][0]['message']['content'];
-        $generatedText = preg_replace('/<think>.*?<\/think>/s', '', $generatedText);
     }
 
     $text = trim($generatedText);
+    if ($text === '') {
+        return ['ok' => false, 'error' => 'Пустой ответ от модели'];
+    }
+
+    $pos = strpos($text, '{');
+    if ($pos !== false) {
+        $text = substr($text, $pos);
+    }
+
+    $decoded = json_decode($text, true);
     if ($text === '') {
         return ['ok' => false, 'error' => 'Пустой ответ от модели'];
     }
