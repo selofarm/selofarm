@@ -1,9 +1,7 @@
-﻿<?php
+<?php
 session_start();
 require_once __DIR__ . '/db.php';
-?>
-
-<!DOCTYPE html>
+?><!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -15,16 +13,16 @@ require_once __DIR__ . '/db.php';
 </head>
 <body>
     <?php include 'header.php'; ?>
-
     <main class="section">
         <h1>Новости и акции</h1>
         <div class="news-grid">
         <?php
-        $stmt = $conn->query("SELECT * FROM news ORDER BY date DESC");
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            ?>
+        try {
+            $stmt = $conn->query("SELECT * FROM news ORDER BY date DESC");
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        ?>
             <div class="news-card">
-<?php
+                <?php
                 if (!empty($row['image'])) {
                     if (strlen($row['image']) > 200) {
                         $imgSrc = "data:image/jpeg;base64," . base64_encode($row['image']);
@@ -35,17 +33,22 @@ require_once __DIR__ . '/db.php';
                 }
                 ?>
                 <div class="news-body">
-                    <h3><?= htmlspecialchars($row['title']); ?></h3>
-                    <p><?= nl2br(htmlspecialchars($row['content'])); ?></p>
-                    <span class="date"><i class="far fa-calendar-alt"></i> <?= htmlspecialchars($row['date']); ?></span>
+                    <h3><?php echo htmlspecialchars($row['title']); ?></h3>
+                    <p><?php echo nl2br(htmlspecialchars($row['content'])); ?></p>
+                    <span class="date">
+                        <i class="far fa-calendar-alt"></i>
+                        <?php echo htmlspecialchars($row['date']); ?>
+                    </span>
                 </div>
             </div>
-            <?php
+        <?php
+            }
+        } catch (Throwable $e) {
+            echo "<p style='color:#b00'>Не удалось загрузить новости.</p>";
         }
         ?>
         </div>
     </main>
-
     <?php include 'footer.php'; ?>
 </body>
 </html>
