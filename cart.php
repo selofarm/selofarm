@@ -208,7 +208,7 @@ foreach ($_SESSION['cart'] as $id => $it) {
                         </td>
                         <td><?= number_format($item['price'], 2, '.', ' ') ?> руб.</td>
                         <td>
-                            <input type="number" name="qty[<?= (int)$item['id'] ?>]" min="1" max="99" value="<?= (int)$item['quantity'] ?>" style="width:80px">
+                            <input type="number" name="qty[<?= (int)$item['id'] ?>]" min="1" value="<?= (int)$item['quantity'] ?>" style="width:80px">
                         </td>
                         <td><?= number_format($item['subtotal'], 2, '.', ' ') ?> руб.</td>
                         <td>
