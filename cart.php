@@ -208,7 +208,8 @@ foreach ($_SESSION['cart'] as $id => $it) {
                         </td>
                         <td><?= number_format($item['price'], 2, '.', ' ') ?> руб.</td>
                         <td>
-                            <input type="number" name="qty[<?= (int)$item['id'] ?>]" min="1" value="<?= (int)$item['quantity'] ?>" style="width:80px">
+                            <input type="number" name="qty[<?= (int)$item['id'] ?>]" min="1" max="99" value="<?= (int)$item['quantity'] ?>" style="width:80px">
+                            <div style="font-size:11px;color:#888;margin-top:4px">макс. 99 шт.</div>
                         </td>
                         <td><?= number_format($item['subtotal'], 2, '.', ' ') ?> руб.</td>
                         <td>
@@ -229,6 +230,12 @@ foreach ($_SESSION['cart'] as $id => $it) {
             </table>
             <input type="hidden" name="product_id" value="">
         </form>
+
+        <p style="font-size:13px;color:#555;margin:8px 0 20px;padding:10px 14px;background:#fff8e1;border-left:4px solid #f9a825;border-radius:3px">
+            <i class="fas fa-info-circle" style="color:#f9a825"></i>
+            Максимальное количество одного товара — <strong>99 шт.</strong>
+            Для заказа большего количества свяжитесь с менеджером.
+        </p>
 
         <form method="POST" class="checkout-form" style="margin-top:24px">
             <h3><i class="fas fa-truck"></i> Оформление заказа</h3>
