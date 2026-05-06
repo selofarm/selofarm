@@ -14,9 +14,14 @@ if (isset($_POST['add_to_cart'])) {
             $_SESSION['cart'] = [];
         }
         if (isset($_SESSION['cart'][$product_id])) {
-            $_SESSION['cart'][$product_id]['quantity']++;
+            if ($_SESSION['cart'][$product_id]['quantity'] >= 99) {
+                $_SESSION['cart_limit_error'] = true;
+            } else {
+                $_SESSION['cart'][$product_id]['quantity']++;
+            }
         } else {
             $_SESSION['cart'][$product_id] = [
+                'id' => (int)$product['id'],
                 'name' => $product['name'],
                 'price' => $product['price'],
                 'image' => $product['image'],
@@ -46,6 +51,12 @@ $product = $stmt->fetch();
     <?php include 'header.php'; ?>
 
     <div class="section">
+        <?php if (!empty($_SESSION['cart_limit_error'])): unset($_SESSION['cart_limit_error']); ?>
+            <p style="color:#c00;font-weight:bold;margin-bottom:12px">
+                <i class="fas fa-exclamation-circle"></i>
+                Максимальное количество одного товара — 99 шт. Для заказа большего количества свяжитесь с менеджером.
+            </p>
+        <?php endif; ?>
         <div class="product-details">
     <?php if (!empty($product['image'])): ?>
         <?php if (strlen($product['image']) > 200): ?> 
@@ -62,7 +73,7 @@ $product = $stmt->fetch();
 
     <div class="product-info">
         <h1><?= htmlspecialchars($product['name']) ?></h1>
-        <p class="price">Цена: <?= htmlspecialchars($product['price']) ?> руб.</p>
+        <p class="price">Цена: <?= htmlspecialchars(number_format((float)$product['price'], 2, '.', ' ')) ?> руб./<?= htmlspecialchars($product['price_unit'] ?? 'шт.') ?></p>
         <p><?= htmlspecialchars($product['description']) ?></p>
         <form method="POST">
             <input type="hidden" name="product_id" value="<?= $product['id']; ?>">

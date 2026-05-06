@@ -38,7 +38,7 @@ require_once __DIR__ . '/db.php';
                 echo "<div class='product'>";
                 echo "<img src='" . htmlspecialchars($row['image']) . "' alt='product'>";
                 echo "<h3>" . htmlspecialchars($row['name']) . "</h3>";
-                echo "<p>Цена: " . htmlspecialchars($row['price']) . " руб.</p>";
+                echo "<p>Цена: " . htmlspecialchars(number_format((float)$row['price'], 2, '.', ' ')) . " руб./" . htmlspecialchars($row['price_unit'] ?? 'шт.') . "</p>";
                 echo "<a href='product.php?id=" . (int)$row['id'] . "' class='btn'>Подробнее</a>";
                 echo "</div>";
             }

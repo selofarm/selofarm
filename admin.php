@@ -7,6 +7,18 @@ ini_set('display_errors', '1');
 
 require_once __DIR__ . '/db.php';
 
+/* ── Авто-миграция: убедиться, что price_unit существует ─────── */
+try {
+    $cols = $conn->query("SHOW COLUMNS FROM products")->fetchAll(PDO::FETCH_ASSOC);
+    $hasPriceUnit = false;
+    foreach ($cols as $c) {
+        if (strcasecmp($c['Field'], 'price_unit') === 0) { $hasPriceUnit = true; break; }
+    }
+    if (!$hasPriceUnit) {
+        $conn->exec("ALTER TABLE products ADD COLUMN price_unit VARCHAR(20) NOT NULL DEFAULT 'шт.' AFTER price");
+    }
+} catch (Throwable $e) { /* таблица ещё не создана — пропустить */ }
+
 /* =====================[ Авторизация ]====================== */
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -68,7 +80,7 @@ $edit_news    = null;
 if (isset($_GET['edit_product'])) {
     $pid = (int)$_GET['edit_product'];
     if ($pid > 0) {
-        $stmt = $conn->prepare("SELECT id, name, price, description, image FROM products WHERE id = ?");
+        $stmt = $conn->prepare("SELECT id, name, price, price_unit, description, image FROM products WHERE id = ?");
         $stmt->execute([$pid]);
         $edit_product = $stmt->fetch() ?: null;
         if (!$edit_product) {
@@ -101,6 +113,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['add_product']) || isset($_POST['edit_product'])) {
             $name        = trim($_POST['name'] ?? '');
             $priceStr    = trim((string)($_POST['price'] ?? ''));
+            $allowed_units = ['кг', 'шт.', 'л', 'г', 'уп.', '100 г'];
+            $price_unit  = trim($_POST['price_unit'] ?? 'шт.');
+            if (!in_array($price_unit, $allowed_units, true)) { $price_unit = 'шт.'; }
             $description = trim($_POST['description'] ?? '');
             $imgErr      = null;
             $new_image   = loadUploadedImage('image', $allowed_types, $max_file_size, $imgErr);
@@ -116,8 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!isset($error)) {
                 try {
                     if (isset($_POST['add_product'])) {
-                        $stmt = $conn->prepare("INSERT INTO products (name, price, description, image) VALUES (?, ?, ?, ?)");
-                        $stmt->execute([$name, (float)$priceStr, $description, $new_image]);
+                        $stmt = $conn->prepare("INSERT INTO products (name, price, price_unit, description, image) VALUES (?, ?, ?, ?, ?)");
+                        $stmt->execute([$name, (float)$priceStr, $price_unit, $description, $new_image]);
                         $success = "Продукт успешно добавлен!";
                        echo "<script>window.location.href = 'admin.php#products';</script>";
                         exit;
@@ -132,8 +147,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $stmt->execute([$id]);
                             $new_image = $stmt->fetchColumn();
                         }
-                        $stmt = $conn->prepare("UPDATE products SET name = ?, price = ?, description = ?, image = ? WHERE id = ?");
-                        $stmt->execute([$name, (float)$priceStr, $description, $new_image, $id]);
+                        $stmt = $conn->prepare("UPDATE products SET name = ?, price = ?, price_unit = ?, description = ?, image = ? WHERE id = ?");
+                        $stmt->execute([$name, (float)$priceStr, $price_unit, $description, $new_image, $id]);
                         $success = "Продукт успешно обновлён!";
                         echo "<script>window.location.href = 'admin.php#products';</script>";
                         exit;
@@ -144,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (isset($_POST['edit_product'])) {
                         $pid = (int)($_POST['id'] ?? 0);
                         if ($pid > 0) {
-                            $stmt = $conn->prepare("SELECT id, name, price, description, image FROM products WHERE id = ?");
+                            $stmt = $conn->prepare("SELECT id, name, price, price_unit, description, image FROM products WHERE id = ?");
                             $stmt->execute([$pid]);
                             $edit_product = $stmt->fetch() ?: null;
                         }
@@ -297,7 +312,7 @@ if (isset($_GET['delete_news'])) {
 // Продукты
 $products = [];
 try {
-    $stmt = $conn->query("SELECT id, name, price, description, image FROM products ORDER BY id DESC");
+    $stmt = $conn->query("SELECT id, name, price, price_unit, description, image FROM products ORDER BY id DESC");
     $products = $stmt->fetchAll();
 } catch (Throwable $e) { /* игнор для списка */ }
 
@@ -437,6 +452,20 @@ function stars($n){ $n = (int)$n; $n = max(0, min(5,$n)); return str_repeat('★
                         <input type="number" name="price" placeholder="Цена" step="0.01" min="0" value="<?php echo $edit_product ? htmlspecialchars($edit_product['price']) : ''; ?>" required>
                     </div>
                     <div class="input-group">
+                        <i class="fas fa-tag"></i>
+                        <select name="price_unit" style="padding:10px;width:100%">
+                            <?php
+                            $units = ['кг', 'шт.', 'л', 'г', 'уп.', '100 г'];
+                            $cur   = $edit_product['price_unit'] ?? 'шт.';
+                            foreach ($units as $u):
+                            ?>
+                                <option value="<?php echo htmlspecialchars($u); ?>" <?php echo ($cur === $u) ? 'selected' : ''; ?>>
+                                    Цена за <?php echo htmlspecialchars($u); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="input-group">
                         <i class="fas fa-file-alt"></i>
                         <textarea name="description" placeholder="Описание" required><?php echo $edit_product ? htmlspecialchars($edit_product['description']) : ''; ?></textarea>
                     </div>
@@ -474,7 +503,7 @@ function stars($n){ $n = (int)$n; $n = max(0, min(5,$n)); return str_repeat('★
                             <tr>
                                 <td><?php echo (int)$product['id']; ?></td>
                                 <td><?php echo htmlspecialchars($product['name']); ?></td>
-                                <td><?php echo number_format((float)$product['price'], 2, '.', ' '); ?> руб.</td>
+                                <td><?php echo number_format((float)$product['price'], 2, '.', ' '); ?> руб./<?php echo htmlspecialchars($product['price_unit'] ?? 'шт.'); ?></td>
                                 <td><?php echo nl2br(htmlspecialchars($product['description'])); ?></td>
                                 <td>
                                     <?php if (!empty($product['image'])): ?>

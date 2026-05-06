@@ -60,7 +60,11 @@ if (isset($_POST['add_to_cart'])) {
         }
 
         if (isset($_SESSION['cart'][$product_id])) {
-            $_SESSION['cart'][$product_id]['quantity']++;
+            if ($_SESSION['cart'][$product_id]['quantity'] >= 99) {
+                $_SESSION['cart_limit_error'] = true;
+            } else {
+                $_SESSION['cart'][$product_id]['quantity']++;
+            }
         } else {
             $_SESSION['cart'][$product_id] = [
                 'id' => (int)$product['id'],
@@ -79,7 +83,7 @@ $aiProducts = [];
 $aiError = '';
 
 try {
-    $stmt = $conn->query("SELECT id, name, price, description, image FROM products ORDER BY id DESC");
+    $stmt = $conn->query("SELECT id, name, price, price_unit, description, image FROM products ORDER BY id DESC");
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Throwable $e) {
     $products = [];
@@ -118,6 +122,12 @@ if (isset($_POST['generate_recipe'])) {
 
 <div class="section">
     <h1>Каталог продукции</h1>
+    <?php if (!empty($_SESSION['cart_limit_error'])): unset($_SESSION['cart_limit_error']); ?>
+        <p style="color:#c00;font-weight:bold;margin-bottom:12px">
+            <i class="fas fa-exclamation-circle"></i>
+            Максимальное количество одного товара — 99 шт. Для заказа большего количества свяжитесь с менеджером.
+        </p>
+    <?php endif; ?>
 
     <section class="ai-recipe-box">
         <p class="ai-kicker">ИИ-помощник</p>
@@ -170,7 +180,7 @@ if (isset($_POST['generate_recipe'])) {
                                     <img src="<?= htmlspecialchars($src, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>" alt="<?= htmlspecialchars((string)$row['name'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>">
                                     <div>
                                         <h4><?= htmlspecialchars((string)$row['name'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></h4>
-                                        <p class="ai-price">Цена: <?= htmlspecialchars(number_format((float)$row['price'], 2, '.', ' '), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?> руб.</p>
+                                        <p class="ai-price">Цена: <?= htmlspecialchars(number_format((float)$row['price'], 2, '.', ' '), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?> руб./<?= htmlspecialchars((string)($row['price_unit'] ?? 'шт.'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
                                         <p><?= htmlspecialchars((string)($row['description'] ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
                                         <div class="ai-product-actions">
                                             <a href="product.php?id=<?= (int)$row['id'] ?>" class="btn">Подробнее</a>
@@ -228,7 +238,7 @@ if (isset($_POST['generate_recipe'])) {
             <div class="product">
                 <img src="<?= htmlspecialchars($src, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>" alt="product">
                 <h3><?= htmlspecialchars((string)$row['name'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></h3>
-                <p>Цена: <?= htmlspecialchars(number_format((float)$row['price'], 2, '.', ' '), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?> руб.</p>
+                <p>Цена: <?= htmlspecialchars(number_format((float)$row['price'], 2, '.', ' '), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?> руб./<?= htmlspecialchars((string)($row['price_unit'] ?? 'шт.'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
                 <p><?= htmlspecialchars((string)($row['description'] ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
                 <a href="product.php?id=<?= (int)$row['id'] ?>" class="btn">Подробнее</a>
 

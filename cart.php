@@ -56,14 +56,24 @@ if (isset($_POST['remove_item'])) {
 
 /* =====================[ Обновление количества ]============ */
 if (isset($_POST['update_qty'])) {
+    $qty_exceeded = false;
     foreach ((array)($_POST['qty'] ?? []) as $pid => $qty) {
         $pid = (int)$pid;
-        $q   = max(1, (int)$qty);
+        $q   = (int)$qty;
+        if ($q > 99) {
+            $q = 99;
+            $qty_exceeded = true;
+        }
+        $q = max(1, $q);
         if (isset($_SESSION['cart'][$pid])) {
             $_SESSION['cart'][$pid]['quantity'] = $q;
         }
     }
-    $success = "Количество обновлено.";
+    if ($qty_exceeded) {
+        $error = "Максимальное количество одного товара — 99 шт. Для заказа большего количества свяжитесь с менеджером.";
+    } else {
+        $success = "Количество обновлено.";
+    }
 }
 
 /* =====================[ Оформление заказа ]================
@@ -198,7 +208,7 @@ foreach ($_SESSION['cart'] as $id => $it) {
                         </td>
                         <td><?= number_format($item['price'], 2, '.', ' ') ?> руб.</td>
                         <td>
-                            <input type="number" name="qty[<?= (int)$item['id'] ?>]" min="1" value="<?= (int)$item['quantity'] ?>" style="width:80px">
+                            <input type="number" name="qty[<?= (int)$item['id'] ?>]" min="1" max="99" value="<?= (int)$item['quantity'] ?>" style="width:80px">
                         </td>
                         <td><?= number_format($item['subtotal'], 2, '.', ' ') ?> руб.</td>
                         <td>
