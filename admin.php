@@ -242,6 +242,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        /* ---------- ЗАКАЗЫ: изменить статус ---------- */
+        if (isset($_POST['update_order_status'])) {
+            $order_id  = (int)($_POST['order_id'] ?? 0);
+            $allowed_statuses = ['Новый', 'В обработке', 'Доставляется', 'Выполнен', 'Отменён'];
+            $new_status = trim($_POST['order_status'] ?? '');
+            if ($order_id <= 0 || !in_array($new_status, $allowed_statuses, true)) {
+                $error = "Некорректные данные заказа.";
+            } else {
+                try {
+                    $stmt = $conn->prepare("UPDATE orders SET status = ? WHERE id = ?");
+                    $stmt->execute([$new_status, $order_id]);
+                    $success = "Статус заказа #$order_id изменён на «$new_status».";
+                } catch (Throwable $e) {
+                    $error = "Ошибка обновления статуса: " . $e->getMessage();
+                }
+                echo "<script>window.location.href = 'admin.php#orders';</script>";
+                exit;
+            }
+        }
+
         /* ---------- ОТЗЫВЫ: одобрить / удалить ---------- */
         if (isset($_POST['approve_review']) || isset($_POST['delete_review'])) {
             $review_id = (int)($_POST['review_id'] ?? 0);
@@ -305,6 +325,21 @@ if (isset($_GET['delete_news'])) {
         $success = "Новость успешно удалена!";
     } catch (Throwable $e) {
         $error = "Ошибка удаления новости: " . $e->getMessage();
+    }
+}
+if (isset($_GET['delete_order'])) {
+    $order_id = (int)$_GET['delete_order'];
+    try {
+        $conn->beginTransaction();
+        $stmt = $conn->prepare("DELETE FROM order_items WHERE order_id = ?");
+        $stmt->execute([$order_id]);
+        $stmt = $conn->prepare("DELETE FROM orders WHERE id = ?");
+        $stmt->execute([$order_id]);
+        $conn->commit();
+        $success = "Заказ #$order_id успешно удалён!";
+    } catch (Throwable $e) {
+        $conn->rollBack();
+        $error = "Ошибка удаления заказа: " . $e->getMessage();
     }
 }
 
@@ -407,6 +442,18 @@ function stars($n){ $n = (int)$n; $n = max(0, min(5,$n)); return str_repeat('★
         .muted{color:#666}
         .pagination{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px;}
         textarea{min-height:120px}
+        .status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+        .status-new{background:#e8f4ff;color:#1565c0;border:1px solid #90caf9}
+        .status-process{background:#fff8e1;color:#e65100;border:1px solid #ffcc02}
+        .status-delivery{background:#e3f2fd;color:#0277bd;border:1px solid #81d4fa}
+        .status-done{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+        .status-cancel{background:#fce4ec;color:#b71c1c;border:1px solid #f48fb1}
+        .order-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;}
+        .order-actions select{padding:6px 10px;border-radius:4px;border:1px solid #ccc;font-size:14px;}
+        .order-actions .btn-status{padding:6px 14px;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:14px;}
+        .order-actions .btn-status:hover{background:#0056b3}
+        .order-actions .btn-del-order{padding:6px 14px;background:#dc3545;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:14px;}
+        .order-actions .btn-del-order:hover{background:#c82333}
     </style>
 </head>
 <body>
@@ -703,16 +750,31 @@ function stars($n){ $n = (int)$n; $n = max(0, min(5,$n)); return str_repeat('★
                 <?php if (empty($orders)): ?>
                     <p>Заказов пока нет</p>
                 <?php else: ?>
-                    <?php foreach ($orders as $order): ?>
+                    <?php
+                    $status_class_map = [
+                        'Новый'        => 'status-new',
+                        'В обработке'  => 'status-process',
+                        'Доставляется' => 'status-delivery',
+                        'Выполнен'     => 'status-done',
+                        'Отменён'      => 'status-cancel',
+                    ];
+                    $all_statuses = ['Новый', 'В обработке', 'Доставляется', 'Выполнен', 'Отменён'];
+                    ?>
+                    <?php foreach ($orders as $order):
+                        $cur_status = $order['status'] ?? 'Новый';
+                        $badge_cls  = $status_class_map[$cur_status] ?? 'status-new';
+                    ?>
                         <div class="order-card">
-                            <h3>Заказ #<?php echo (int)$order['id']; ?></h3>
+                            <h3>
+                                Заказ #<?php echo (int)$order['id']; ?>
+                                <span class="status-badge <?php echo $badge_cls; ?>"><?php echo htmlspecialchars($cur_status); ?></span>
+                            </h3>
                             <p><strong>Пользователь:</strong> <?php echo htmlspecialchars($order['username']); ?></p>
                             <p><strong>Имя:</strong> <?php echo htmlspecialchars($order['first_name']); ?></p>
                             <p><strong>Фамилия:</strong> <?php echo htmlspecialchars($order['last_name']); ?></p>
                             <p><strong>Телефон:</strong> <?php echo htmlspecialchars($order['phone']); ?></p>
                             <p><strong>Адрес доставки:</strong> <?php echo htmlspecialchars($order['shipping_address']); ?></p>
                             <p><strong>Дата заказа:</strong> <?php echo htmlspecialchars($order['order_date']); ?></p>
-                            <p><strong>Статус:</strong> <?php echo htmlspecialchars($order['status']); ?></p>
                             <h4>Товары:</h4>
                             <table class="order-table">
                                 <tr>
@@ -730,6 +792,29 @@ function stars($n){ $n = (int)$n; $n = max(0, min(5,$n)); return str_repeat('★
                                     </tr>
                                 <?php endforeach; ?>
                             </table>
+
+                            <!-- Действия с заказом -->
+                            <div class="order-actions">
+                                <form method="POST" style="display:flex;align-items:center;gap:8px;">
+                                    <input type="hidden" name="csrf" value="<?php echo $csrf; ?>">
+                                    <input type="hidden" name="order_id" value="<?php echo (int)$order['id']; ?>">
+                                    <select name="order_status">
+                                        <?php foreach ($all_statuses as $st): ?>
+                                            <option value="<?php echo htmlspecialchars($st); ?>" <?php echo ($cur_status === $st) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($st); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <button type="submit" name="update_order_status" class="btn-status">
+                                        <i class="fas fa-sync-alt"></i> Изменить статус
+                                    </button>
+                                </form>
+                                <a href="admin.php?delete_order=<?php echo (int)$order['id']; ?>#orders"
+                                   class="btn-del-order"
+                                   onclick="return confirm('Удалить заказ #<?php echo (int)$order['id']; ?> и все его позиции?');">
+                                    <i class="fas fa-trash"></i> Удалить заказ
+                                </a>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
