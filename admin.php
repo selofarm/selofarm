@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 
 /* ===== Включить вывод ошибок (для локальной отладки) ===== */
@@ -7,17 +8,48 @@ ini_set('display_errors', '1');
 
 require_once __DIR__ . '/db.php';
 
-/* ── Авто-миграция: убедиться, что price_unit существует ─────── */
+/* ── Авто-миграция ───────────────────────────────────────────── */
 try {
     $cols = $conn->query("SHOW COLUMNS FROM products")->fetchAll(PDO::FETCH_ASSOC);
-    $hasPriceUnit = false;
+    $hasPriceUnit = false; $imageType = '';
     foreach ($cols as $c) {
-        if (strcasecmp($c['Field'], 'price_unit') === 0) { $hasPriceUnit = true; break; }
+        if (strcasecmp($c['Field'], 'price_unit') === 0) $hasPriceUnit = true;
+        if (strcasecmp($c['Field'], 'image') === 0)      $imageType    = strtolower($c['Type']);
     }
     if (!$hasPriceUnit) {
         $conn->exec("ALTER TABLE products ADD COLUMN price_unit VARCHAR(20) NOT NULL DEFAULT 'шт.' AFTER price");
     }
+    // Если image — не BLOB-тип, конвертируем в LONGBLOB
+    if ($imageType !== '' && strpos($imageType, 'blob') === false) {
+        $conn->exec("ALTER TABLE products MODIFY COLUMN image LONGBLOB");
+    }
 } catch (Throwable $e) { /* таблица ещё не создана — пропустить */ }
+
+try {
+    $cols = $conn->query("SHOW COLUMNS FROM news")->fetchAll(PDO::FETCH_ASSOC);
+    $imageType = '';
+    foreach ($cols as $c) {
+        if (strcasecmp($c['Field'], 'image') === 0) $imageType = strtolower($c['Type']);
+    }
+    if ($imageType !== '' && strpos($imageType, 'blob') === false) {
+        $conn->exec("ALTER TABLE news MODIFY COLUMN image LONGBLOB");
+    }
+} catch (Throwable $e) { /* игнор */ }
+
+try {
+    $cols = $conn->query("SHOW COLUMNS FROM orders")->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($cols as $c) {
+        if (strcasecmp($c['Field'], 'status') === 0) {
+            // Если ENUM или VARCHAR короче 50 — расширяем до VARCHAR(50)
+            if (strpos(strtolower($c['Type']), 'enum') !== false
+                || strtolower($c['Type']) === 'varchar(20)'
+                || strtolower($c['Type']) === 'varchar(30)') {
+                $conn->exec("ALTER TABLE orders MODIFY COLUMN status VARCHAR(50) NOT NULL DEFAULT 'Новый'");
+            }
+            break;
+        }
+    }
+} catch (Throwable $e) { /* игнор */ }
 
 /* =====================[ Авторизация ]====================== */
 if (!isset($_SESSION['user_id'])) {
@@ -134,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt = $conn->prepare("INSERT INTO products (name, price, price_unit, description, image) VALUES (?, ?, ?, ?, ?)");
                         $stmt->execute([$name, (float)$priceStr, $price_unit, $description, $new_image]);
                         $success = "Продукт успешно добавлен!";
-                       echo "<script>window.location.href = 'admin.php#products';</script>";
+                        header("Location: admin.php#products");
                         exit;
                     } else {
                         // edit_product
@@ -150,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt = $conn->prepare("UPDATE products SET name = ?, price = ?, price_unit = ?, description = ?, image = ? WHERE id = ?");
                         $stmt->execute([$name, (float)$priceStr, $price_unit, $description, $new_image, $id]);
                         $success = "Продукт успешно обновлён!";
-                        echo "<script>window.location.href = 'admin.php#products';</script>";
+                        header("Location: admin.php#products");
                         exit;
                     }
                 } catch (Throwable $e) {
@@ -196,8 +228,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt = $conn->prepare("INSERT INTO news (title, content, date, image) VALUES (?, ?, ?, ?)");
                         $stmt->execute([$title, $content, $date, $new_image]);
                         $success = "Новость успешно добавлена!";
-                        echo "<script>window.location.href = 'admin.php#news';</script>";
-						exit;
+                        header("Location: admin.php#news");
+                        exit;
                     } catch (Throwable $e) {
                         $error = "Ошибка добавления новости: " . $e->getMessage();
                     }
@@ -216,7 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt = $conn->prepare("UPDATE news SET title = ?, content = ?, image = ? WHERE id = ?");
                         $stmt->execute([$title, $content, $new_image, $id]);
                         $success = "Новость успешно обновлена!";
-                       echo "<script>window.location.href = 'admin.php#news';</script>";
+                        header("Location: admin.php#news");
                         exit;
                     } catch (Throwable $e) {
                         $error = "Ошибка обновления новости: " . $e->getMessage();
@@ -253,12 +285,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 try {
                     $stmt = $conn->prepare("UPDATE orders SET status = ? WHERE id = ?");
                     $stmt->execute([$new_status, $order_id]);
-                    $success = "Статус заказа #$order_id изменён на «$new_status».";
+                    // Redirect только при успехе
+                    header("Location: admin.php#orders");
+                    exit;
                 } catch (Throwable $e) {
                     $error = "Ошибка обновления статуса: " . $e->getMessage();
                 }
-                echo "<script>window.location.href = 'admin.php#orders';</script>";
-                exit;
             }
         }
 
@@ -290,7 +322,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$review_id]);
                     $success = "Отзыв #$review_id удалён.";
                 }
-                echo "<script>window.location.href = 'admin.php#reviews';</script>";
+                header("Location: admin.php#reviews");
                 exit;
             } catch (Throwable $e) {
                 $error = "Ошибка обработки отзыва: " . $e->getMessage();
