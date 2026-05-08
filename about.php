@@ -49,23 +49,22 @@ session_start();
             <div class="card">
                 <h2>Где мы находимся</h2>
                 <div id="map"></div>
-                <div class="address">Наш адрес: г. Москва, ул. Примерная, 1</div>
-                <p class="muted">Ниже — интерактивная карта Яндекс. Вы можете проложить маршрут до магазина.</p>
+                <div class="address">Наш адрес: г. Курск, пр. Победы, 19</div>
+                <p class="muted">Интерактивная карта Яндекс. Вы можете проложить маршрут до нашего магазина.</p>
             </div>
         </section>
     </main>
 
     <script type="text/javascript">
         ymaps.ready(function () {
-            // Укажите координаты вашего магазина
-            var coords = [55.751244, 37.618423]; // Москва, для примера
+            var coords = [51.7304, 36.1927]; // Курск, центр города
             var map = new ymaps.Map('map', {
                 center: coords,
-                zoom: 14,
+                zoom: 15,
                 controls: ['zoomControl', 'geolocationControl']
             });
             var placemark = new ymaps.Placemark(coords, {
-                balloonContent: 'Фермерский рынок — ул. Примерная, 1',
+                balloonContent: 'Фермерский рынок — пр. Победы, 19, Курск',
                 hintContent: 'Наш магазин'
             }, {
                 preset: 'islands#redShoppingIcon'
