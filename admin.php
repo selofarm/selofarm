@@ -491,13 +491,6 @@ function getImageSrc($blob) {
         .order-actions .btn-status:hover{background:#0056b3}
         .order-actions .btn-del-order{padding:6px 14px;background:#dc3545;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:14px;}
         .order-actions .btn-del-order:hover{background:#c82333}
-        .modal{display:none;position:fixed;z-index:999;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5)}
-        .modal-content{background-color:#fefefe;margin:5% auto;padding:20px;border-radius:8px;width:90%;max-width:500px;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
-        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-        .modal-header h3{margin:0}
-        .close{color:#aaa;font-size:28px;font-weight:bold;cursor:pointer}
-        .close:hover{color:#000}
-        .modal-image{max-width:100%;max-height:200px;border-radius:4px;margin-bottom:15px}
     </style>
 </head>
 <body>
@@ -522,59 +515,58 @@ function getImageSrc($blob) {
             <?php if (!empty($error))   echo "<p class='error'><i class='fas fa-exclamation-circle'></i> ".htmlspecialchars($error)."</p>"; ?>
 
             <!-- Продукты -->
-            <h2 id="products">Продукты</h2>
-            <button class="btn" onclick="openProductModal()"><i class="fas fa-plus"></i> Добавить продукт</button>
-            
-            <div id="productModal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 id="productModalTitle">Добавить продукт</h3>
-                        <span class="close" onclick="closeProductModal()">&times;</span>
-                    </div>
-                    <form method="POST" enctype="multipart/form-data" id="productForm">
-                        <input type="hidden" name="csrf" value="<?php echo $csrf; ?>">
-                        <input type="hidden" name="id" id="productId" value="">
-                        <input type="hidden" name="current_hash" value="#products">
-
-                        <div id="currentProductImage" style="display:none;">
+            <h2 id="products"><?php echo $edit_product ? 'Редактировать продукт' : 'Добавить продукт'; ?></h2>
+            <div class="form-container">
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf" value="<?php echo $csrf; ?>">
+                    <?php if ($edit_product): ?>
+                        <input type="hidden" name="id" value="<?php echo (int)$edit_product['id']; ?>">
+                        <?php $img = getImageSrc($edit_product['image']); if ($img): ?>
                             <p>Текущее изображение:</p>
-                            <img id="productImagePreview" class="modal-image" src="" alt="Текущее изображение">
-                        </div>
+                            <img src="<?php echo $img; ?>" class="current-image" alt="Текущее изображение">
+                        <?php endif; ?>
+                    <?php endif; ?>
 
-                        <div class="input-group">
-                            <i class="fas fa-box"></i>
-                            <input type="text" name="name" id="productName" placeholder="Название продукта" required>
-                        </div>
-                        <div class="input-group">
-                            <i class="fas fa-ruble-sign"></i>
-                            <input type="number" name="price" id="productPrice" placeholder="Цена" step="0.01" min="0" required>
-                        </div>
-                        <div class="input-group">
-                            <i class="fas fa-tag"></i>
-                            <select name="price_unit" id="productPriceUnit" style="padding:10px;width:100%">
-                                <?php
-                                $units = ['кг', 'шт.', 'л', 'г', 'уп.', '100 г'];
-                                foreach ($units as $u):
-                                ?>
-                                    <option value="<?php echo htmlspecialchars($u); ?>">Цена за <?php echo htmlspecialchars($u); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <i class="fas fa-file-alt"></i>
-                            <textarea name="description" id="productDescription" placeholder="Описание" required></textarea>
-                        </div>
-                        <div class="input-group">
-                            <i class="fas fa-image"></i>
-                            <input type="file" name="image" id="productImage" accept="image/jpeg,image/png,image/gif">
-                            <div class="muted" style="margin-left:8px">JPEG/PNG/GIF, до 10 МБ</div>
-                        </div>
+                    <div class="input-group">
+                        <i class="fas fa-box"></i>
+                        <input type="text" name="name" placeholder="Название продукта" value="<?php echo $edit_product ? htmlspecialchars($edit_product['name']) : ''; ?>" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-ruble-sign"></i>
+                        <input type="number" name="price" placeholder="Цена" step="0.01" min="0" value="<?php echo $edit_product ? htmlspecialchars($edit_product['price']) : ''; ?>" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-tag"></i>
+                        <select name="price_unit" style="padding:10px;width:100%">
+                            <?php
+                            $units = ['кг', 'шт.', 'л', 'г', 'уп.', '100 г'];
+                            $cur   = $edit_product['price_unit'] ?? 'шт.';
+                            foreach ($units as $u):
+                            ?>
+                                <option value="<?php echo htmlspecialchars($u); ?>" <?php echo ($cur === $u) ? 'selected' : ''; ?>>
+                                    Цена за <?php echo htmlspecialchars($u); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-file-alt"></i>
+                        <textarea name="description" placeholder="Описание" required><?php echo $edit_product ? htmlspecialchars($edit_product['description']) : ''; ?></textarea>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-image"></i>
+                        <input type="file" name="image" accept="image/jpeg,image/png,image/gif" <?php echo $edit_product ? '' : 'required'; ?>>
+                        <div class="muted" style="margin-left:8px">JPEG/PNG/GIF, до 10 МБ</div>
+                    </div>
 
-                        <button type="submit" name="add_product" id="productSubmitBtn" class="btn">
-                            <i class="fas fa-plus"></i> Добавить продукт
-                        </button>
-                    </form>
-                </div>
+                    <button type="submit" name="<?php echo $edit_product ? 'edit_product' : 'add_product'; ?>" class="btn">
+                        <i class="fas fa-<?php echo $edit_product ? 'edit' : 'plus'; ?>"></i>
+                        <?php echo $edit_product ? 'Сохранить изменения' : 'Добавить продукт'; ?>
+                    </button>
+                    <?php if ($edit_product): ?>
+                        <a href="admin.php#products" class="btn secondary">Отменить</a>
+                    <?php endif; ?>
+                </form>
             </div>
 
             <h2>Список продуктов</h2>
@@ -605,7 +597,7 @@ function getImageSrc($blob) {
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <button type="button" class="btn-edit" onclick="openProductModal(<?php echo (int)$product['id']; ?>, '<?php echo addslashes(htmlspecialchars($product['name'])); ?>', '<?php echo addslashes($product['price']); ?>', '<?php echo addslashes($product['price_unit'] ?? 'шт.'); ?>', '<?php echo addslashes(htmlspecialchars($product['description'])); ?>', '<?php echo !empty($product['image']) ? addslashes('data:image/jpeg;base64,' . base64_encode($product['image'])) : ''; ?>')"><i class="fas fa-edit"></i> Редактировать</button>
+                                    <a href="admin.php?edit_product=<?php echo (int)$product['id']; ?>#products" class="btn-edit"><i class="fas fa-edit"></i> Редактировать</a>
                                     <a href="admin.php?delete_product=<?php echo (int)$product['id']; ?>#products" class="btn-delete" onclick="return confirm('Удалить продукт #<?php echo (int)$product['id']; ?>?');"><i class="fas fa-trash"></i> Удалить</a>
                                 </td>
                             </tr>
@@ -615,44 +607,40 @@ function getImageSrc($blob) {
             </div>
 
             <!-- Новости -->
-            <h2 id="news">Новости и акции</h2>
-            <button class="btn" onclick="openNewsModal()"><i class="fas fa-plus"></i> Добавить новость</button>
-            
-            <div id="newsModal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 id="newsModalTitle">Добавить новость</h3>
-                        <span class="close" onclick="closeNewsModal()">&times;</span>
-                    </div>
-                    <form method="POST" enctype="multipart/form-data" id="newsForm">
-                        <input type="hidden" name="csrf" value="<?php echo $csrf; ?>">
-                        <input type="hidden" name="id" id="newsId" value="">
-                        <input type="hidden" name="current_hash" value="#news">
-
-                        <div id="currentNewsImage" style="display:none;">
+            <h2 id="news"><?php echo $edit_news ? 'Редактировать новость/акцию' : 'Добавить новость/акцию'; ?></h2>
+            <div class="form-container">
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf" value="<?php echo $csrf; ?>">
+                    <?php if ($edit_news): ?>
+                        <input type="hidden" name="id" value="<?php echo (int)$edit_news['id']; ?>">
+                        <?php $img = getImageSrc($edit_news['image']); if ($img): ?>
                             <p>Текущее изображение:</p>
-                            <img id="newsImagePreview" class="modal-image" src="" alt="Текущее изображение">
-                        </div>
+                            <img src="<?php echo $img; ?>" class="current-image" alt="Текущее изображение">
+                        <?php endif; ?>
+                    <?php endif; ?>
 
-                        <div class="input-group">
-                            <i class="fas fa-newspaper"></i>
-                            <input type="text" name="title" id="newsTitle" placeholder="Заголовок" required>
-                        </div>
-                        <div class="input-group">
-                            <i class="fas fa-file-alt"></i>
-                            <textarea name="content" id="newsContent" placeholder="Текст новости/акции" required></textarea>
-                        </div>
-                        <div class="input-group">
-                            <i class="fas fa-image"></i>
-                            <input type="file" name="image" id="newsImage" accept="image/jpeg,image/png,image/gif">
-                            <div class="muted" style="margin-left:8px">JPEG/PNG/GIF, до 10 МБ</div>
-                        </div>
+                    <div class="input-group">
+                        <i class="fas fa-newspaper"></i>
+                        <input type="text" name="title" placeholder="Заголовок" value="<?php echo $edit_news ? htmlspecialchars($edit_news['title']) : ''; ?>" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-file-alt"></i>
+                        <textarea name="content" placeholder="Текст новости/акции" required><?php echo $edit_news ? htmlspecialchars($edit_news['content']) : ''; ?></textarea>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-image"></i>
+                        <input type="file" name="image" accept="image/jpeg,image/png,image/gif">
+                        <div class="muted" style="margin-left:8px">JPEG/PNG/GIF, до 10 МБ</div>
+                    </div>
 
-                        <button type="submit" name="add_news" id="newsSubmitBtn" class="btn">
-                            <i class="fas fa-plus"></i> Добавить новость
-                        </button>
-                    </form>
-                </div>
+                    <button type="submit" name="<?php echo $edit_news ? 'edit_news' : 'add_news'; ?>" class="btn">
+                        <i class="fas fa-<?php echo $edit_news ? 'edit' : 'plus'; ?>"></i>
+                        <?php echo $edit_news ? 'Сохранить изменения' : 'Добавить новость'; ?>
+                    </button>
+                    <?php if ($edit_news): ?>
+                        <a href="admin.php#news" class="btn secondary">Отменить</a>
+                    <?php endif; ?>
+                </form>
             </div>
 
             <h2>Список новостей/акций</h2>
@@ -683,7 +671,7 @@ function getImageSrc($blob) {
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <button type="button" class="btn-edit" onclick="openNewsModal(<?php echo (int)$item['id']; ?>, '<?php echo addslashes(htmlspecialchars($item['title'])); ?>', '<?php echo addslashes(htmlspecialchars($item['content'])); ?>', '<?php echo !empty($item['image']) ? addslashes('data:image/jpeg;base64,' . base64_encode($item['image'])) : ''; ?>')"><i class="fas fa-edit"></i> Редактировать</button>
+                                    <a href="admin.php?edit_news=<?php echo (int)$item['id']; ?>#news" class="btn-edit"><i class="fas fa-edit"></i> Редактировать</a>
                                     <a href="admin.php?delete_news=<?php echo (int)$item['id']; ?>#news" class="btn-delete" onclick="return confirm('Удалить новость #<?php echo (int)$item['id']; ?>?');"><i class="fas fa-trash"></i> Удалить</a>
                                 </td>
                             </tr>
@@ -890,112 +878,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => errorMsg.remove(), 500);
         }, 6000);
     }
-
-    // Продукты - открыть модалку при редактировании
-    <?php if ($edit_product): ?>
-    openProductModal(<?php echo (int)$edit_product['id']; ?>, <?php echo json_encode(htmlspecialchars($edit_product['name'], ENT_QUOTES, 'UTF-8')); ?>, <?php echo json_encode($edit_product['price']); ?>, <?php echo json_encode(htmlspecialchars($edit_product['price_unit'] ?? 'шт.', ENT_QUOTES, 'UTF-8')); ?>, <?php echo json_encode(htmlspecialchars($edit_product['description'], ENT_QUOTES, 'UTF-8')); ?>, "<?php echo !empty($edit_product['image']) ? 'data:image/jpeg;base64,' . base64_encode($edit_product['image']) : ''; ?>");
-    <?php endif; ?>
-
-    // Новости - открыть модалку при редактировании
-    <?php if ($edit_news): ?>
-    openNewsModal(<?php echo (int)$edit_news['id']; ?>, <?php echo json_encode(htmlspecialchars($edit_news['title'], ENT_QUOTES, 'UTF-8')); ?>, <?php echo json_encode(htmlspecialchars($edit_news['content'], ENT_QUOTES, 'UTF-8')); ?>, "<?php echo !empty($edit_news['image']) ? 'data:image/jpeg;base64,' . base64_encode($edit_news['image']) : ''; ?>");
-    <?php endif; ?>
 });
-
-// Модальное окно товара
-function openProductModal(id, name, price, priceUnit, description, image) {
-    const modal = document.getElementById('productModal');
-    const title = document.getElementById('productModalTitle');
-    const form = document.getElementById('productForm');
-    const submitBtn = document.getElementById('productSubmitBtn');
-    const imageDiv = document.getElementById('currentProductImage');
-    const imagePreview = document.getElementById('productImagePreview');
-    const imageInput = document.getElementById('productImage');
-
-    if (id) {
-        title.textContent = 'Редактировать продукт';
-        document.getElementById('productId').value = id;
-        document.getElementById('productName').value = name;
-        document.getElementById('productPrice').value = price;
-        document.getElementById('productPriceUnit').value = priceUnit;
-        document.getElementById('productDescription').value = description;
-        submitBtn.name = 'edit_product';
-        submitBtn.innerHTML = '<i class="fas fa-edit"></i> Сохранить изменения';
-        imageInput.required = false;
-        if (image) {
-            imagePreview.src = image;
-            imageDiv.style.display = 'block';
-        } else {
-            imageDiv.style.display = 'none';
-        }
-    } else {
-        title.textContent = 'Добавить продукт';
-        document.getElementById('productId').value = '';
-        document.getElementById('productName').value = '';
-        document.getElementById('productPrice').value = '';
-        document.getElementById('productPriceUnit').value = 'шт.';
-        document.getElementById('productDescription').value = '';
-        submitBtn.name = 'add_product';
-        submitBtn.innerHTML = '<i class="fas fa-plus"></i> Добавить продукт';
-        imageInput.required = true;
-        imageDiv.style.display = 'none';
-    }
-    modal.style.display = 'block';
-}
-
-function closeProductModal() {
-    document.getElementById('productModal').style.display = 'none';
-    window.location.hash = 'products';
-}
-
-// Модальное окно новости
-function openNewsModal(id, title, content, image) {
-    const modal = document.getElementById('newsModal');
-    const modalTitle = document.getElementById('newsModalTitle');
-    const form = document.getElementById('newsForm');
-    const submitBtn = document.getElementById('newsSubmitBtn');
-    const imageDiv = document.getElementById('currentNewsImage');
-    const imagePreview = document.getElementById('newsImagePreview');
-    const imageInput = document.getElementById('newsImage');
-
-    if (id) {
-        modalTitle.textContent = 'Редактировать новость';
-        document.getElementById('newsId').value = id;
-        document.getElementById('newsTitle').value = title;
-        document.getElementById('newsContent').value = content;
-        submitBtn.name = 'edit_news';
-        submitBtn.innerHTML = '<i class="fas fa-edit"></i> Сохранить изменения';
-        imageInput.required = false;
-        if (image) {
-            imagePreview.src = image;
-            imageDiv.style.display = 'block';
-        } else {
-            imageDiv.style.display = 'none';
-        }
-    } else {
-        modalTitle.textContent = 'Добавить новость';
-        document.getElementById('newsId').value = '';
-        document.getElementById('newsTitle').value = '';
-        document.getElementById('newsContent').value = '';
-        submitBtn.name = 'add_news';
-        submitBtn.innerHTML = '<i class="fas fa-plus"></i> Добавить новость';
-        imageInput.required = false;
-        imageDiv.style.display = 'none';
-    }
-    modal.style.display = 'block';
-}
-
-function closeNewsModal() {
-    document.getElementById('newsModal').style.display = 'none';
-    window.location.hash = 'news';
-}
-
-// Закрытие модальных окон при клике вне
-window.onclick = function(event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.style.display = 'none';
-    }
-}
 
 // Обработка якорей при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
