@@ -394,9 +394,8 @@ try {
 $orders = [];
 try {
     $stmt = $conn->query("
-        SELECT o.id, o.order_date, o.first_name, o.last_name, o.phone, o.shipping_address, o.status, u.username
+        SELECT o.id, o.order_date, o.first_name, o.last_name, o.phone, o.shipping_address, o.status
         FROM orders o
-        JOIN users u ON o.user_id = u.id
         ORDER BY o.order_date DESC, o.id DESC
     ");
     $orders = $stmt->fetchAll();
@@ -450,8 +449,8 @@ function stars($n){ $n = (int)$n; $n = max(0, min(5,$n)); return str_repeat('★
         .btn:hover { background: #218838; }
         .logout { background: #dc3545; }
         .logout:hover { background: #c82333; }
-        .success { color: green; font-weight: bold; }
-        .error { color: red; font-weight: bold; }
+        .success { color: green; font-weight: bold; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; background: #e8f5e9; border: 2px solid #4caf50; padding: 15px 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 16px; }
+        .error { color: red; font-weight: bold; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; background: #ffebee; border: 2px solid #f44336; padding: 15px 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 16px; }
         .products-section, .news-section, .orders-section { margin-top: 20px; }
         .order-card, .product-card, .news-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
         .order-table, .products-table, .news-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -801,7 +800,6 @@ function stars($n){ $n = (int)$n; $n = max(0, min(5,$n)); return str_repeat('★
                                 Заказ #<?php echo (int)$order['id']; ?>
                                 <span class="status-badge <?php echo $badge_cls; ?>"><?php echo htmlspecialchars($cur_status); ?></span>
                             </h3>
-                            <p><strong>Пользователь:</strong> <?php echo htmlspecialchars($order['username']); ?></p>
                             <p><strong>Имя:</strong> <?php echo htmlspecialchars($order['first_name']); ?></p>
                             <p><strong>Фамилия:</strong> <?php echo htmlspecialchars($order['last_name']); ?></p>
                             <p><strong>Телефон:</strong> <?php echo htmlspecialchars($order['phone']); ?></p>
@@ -854,6 +852,28 @@ function stars($n){ $n = (int)$n; $n = max(0, min(5,$n)); return str_repeat('★
         </div>
     </div>
 <script>
+// Обработка уведомлений - автоматическое скрытие
+document.addEventListener('DOMContentLoaded', function() {
+    const successMsg = document.querySelector('.success');
+    const errorMsg = document.querySelector('.error');
+    
+    if (successMsg) {
+        setTimeout(() => {
+            successMsg.style.transition = 'opacity 0.5s';
+            successMsg.style.opacity = '0';
+            setTimeout(() => successMsg.remove(), 500);
+        }, 4000);
+    }
+    
+    if (errorMsg) {
+        setTimeout(() => {
+            errorMsg.style.transition = 'opacity 0.5s';
+            errorMsg.style.opacity = '0';
+            setTimeout(() => errorMsg.remove(), 500);
+        }, 6000);
+    }
+});
+
 // Обработка якорей при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
     // Прокрутка к якорю если он есть в URL
