@@ -24,7 +24,24 @@ try {
     $results[] = ['err', 'products.price_unit — ошибка: ' . $e->getMessage()];
 }
 
-/* ── 2. Гарантировать approved в reviews (как в существующем коде) */
+/* ── 2. Удалить user_id из orders (связь с пользователем больше не нужна) */
+try {
+    $cols = $conn->query("SHOW COLUMNS FROM orders")->fetchAll(PDO::FETCH_ASSOC);
+    $hasUserId = false;
+    foreach ($cols as $c) {
+        if (strcasecmp($c['Field'], 'user_id') === 0) { $hasUserId = true; break; }
+    }
+    if ($hasUserId) {
+        $conn->exec("ALTER TABLE orders DROP COLUMN user_id");
+        $results[] = ['ok', 'orders.user_id — удалена связь с пользователем.'];
+    } else {
+        $results[] = ['ok', 'orders.user_id — уже удален, пропущено.'];
+    }
+} catch (Throwable $e) {
+    $results[] = ['err', 'orders.user_id — ошибка: ' . $e->getMessage()];
+}
+
+/* ── 3. Гарантировать approved в reviews (как в существующем коде) */
 try {
     $cols = $conn->query("SHOW COLUMNS FROM reviews")->fetchAll(PDO::FETCH_ASSOC);
     $has  = false;
