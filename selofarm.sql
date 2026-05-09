@@ -86,25 +86,24 @@ INSERT INTO `news` (`id`, `title`, `content`, `date`, `image`, `created_at`) VAL
 
 CREATE TABLE `orders` (
   `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL DEFAULT 0,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
   `phone` varchar(20) NOT NULL,
   `shipping_address` text NOT NULL,
   `order_date` timestamp NULL DEFAULT current_timestamp(),
-  `status` enum('Open','Processed','Completed','Canceled') DEFAULT 'Open'
+  `status` varchar(50) NOT NULL DEFAULT 'Новый'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Дамп данных таблицы `orders`
 --
 
-INSERT INTO `orders` (`id`, `user_id`, `first_name`, `last_name`, `phone`, `shipping_address`, `order_date`, `status`) VALUES
-(1, 2, 'Мария', 'Иванова', '+7 (912) 345-67-89', 'ул. Ленина, д. 10, кв. 25, г. Москва', '2026-01-12 09:15:00', 'Completed'),
-(2, 3, 'Петр', 'Сидоров', '+7 (923) 456-78-90', 'пр. Мира, д. 45, г. Санкт-Петербург', '2026-01-14 11:30:00', 'Processed'),
-(3, 2, 'Мария', 'Иванова', '+7 (912) 345-67-89', 'ул. Ленина, д. 10, кв. 25, г. Москва', '2026-01-18 14:20:00', 'Open'),
-(4, 4, 'Алексей', 'Кузнецов', '+7 (934) 567-89-01', 'ул. Садовая, д. 3, г. Екатеринбург', '2026-01-19 16:45:00', 'Completed'),
-(5, 5, 'Ольга', 'Петрова', '+7 (945) 678-90-12', 'ул. Центральная, д. 7, г. Казань', '2026-01-22 10:10:00', 'Processed');
+INSERT INTO `orders` (`id`, `first_name`, `last_name`, `phone`, `shipping_address`, `order_date`, `status`) VALUES
+(1, 'Мария', 'Иванова', '+7 (912) 345-67-89', 'ул. Ленина, д. 10, кв. 25, г. Москва', '2026-01-12 09:15:00', 'Выполнен'),
+(2, 'Петр', 'Сидоров', '+7 (923) 456-78-90', 'пр. Мира, д. 45, г. Санкт-Петербург', '2026-01-14 11:30:00', 'В обработке'),
+(3, 'Мария', 'Иванова', '+7 (912) 345-67-89', 'ул. Ленина, д. 10, кв. 25, г. Москва', '2026-01-18 14:20:00', 'Новый'),
+(4, 'Алексей', 'Кузнецов', '+7 (934) 567-89-01', 'ул. Садовая, д. 3, г. Екатеринбург', '2026-01-19 16:45:00', 'Выполнен'),
+(5, 'Ольга', 'Петрова', '+7 (945) 678-90-12', 'ул. Центральная, д. 7, г. Казань', '2026-01-22 10:10:00', 'В обработке');
 
 -- --------------------------------------------------------
 
@@ -259,7 +258,6 @@ ALTER TABLE `news`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_user_id` (`user_id`),
   ADD KEY `idx_order_date` (`order_date`),
   ADD KEY `idx_status` (`status`);
 
