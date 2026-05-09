@@ -422,6 +422,12 @@ if ($orders) {
 
 /* =====================[ Утилита: звёзды ]================== */
 function stars($n){ $n = (int)$n; $n = max(0, min(5,$n)); return str_repeat('★',$n) . str_repeat('☆', 5-$n); }
+
+function getImageSrc($blob) {
+    if (empty($blob)) return '';
+    if (is_resource($blob)) return '';
+    return 'data:image/jpeg;base64,' . base64_encode((string)$blob);
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -592,14 +598,14 @@ function stars($n){ $n = (int)$n; $n = max(0, min(5,$n)); return str_repeat('★
                                 <td><?php echo number_format((float)$product['price'], 2, '.', ' '); ?> руб./<?php echo htmlspecialchars($product['price_unit'] ?? 'шт.'); ?></td>
                                 <td><?php echo nl2br(htmlspecialchars($product['description'])); ?></td>
                                 <td>
-                                    <?php if (!empty($product['image'])): ?>
-                                        <img src="data:image/jpeg;base64,<?php echo base64_encode($product['image']); ?>" class="product-image" alt="Изображение">
+                                    <?php $imgSrc = getImageSrc($product['image']); if ($imgSrc): ?>
+                                        <img src="<?php echo $imgSrc; ?>" class="product-image" alt="Изображение">
                                     <?php else: ?>
                                         Нет изображения
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <button type="button" class="btn-edit" onclick="openProductModal(<?php echo (int)$product['id']; ?>, <?php echo json_encode(htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8')); ?>, <?php echo json_encode($product['price']); ?>, <?php echo json_encode(htmlspecialchars($product['price_unit'] ?? 'шт.', ENT_QUOTES, 'UTF-8')); ?>, <?php echo json_encode(htmlspecialchars($product['description'], ENT_QUOTES, 'UTF-8')); ?>, '<?php echo !empty($product['image']) ? 'data:image/jpeg;base64,' . base64_encode($product['image']) : ''; ?>')"><i class="fas fa-edit"></i> Редактировать</button>
+                                    <button type="button" class="btn-edit" onclick="openProductModal(<?php echo (int)$product['id']; ?>, '<?php echo addslashes(htmlspecialchars($product['name'])); ?>', '<?php echo addslashes($product['price']); ?>', '<?php echo addslashes($product['price_unit'] ?? 'шт.'); ?>', '<?php echo addslashes(htmlspecialchars($product['description'])); ?>', '<?php echo !empty($product['image']) ? addslashes('data:image/jpeg;base64,' . base64_encode($product['image'])) : ''; ?>')"><i class="fas fa-edit"></i> Редактировать</button>
                                     <a href="admin.php?delete_product=<?php echo (int)$product['id']; ?>#products" class="btn-delete" onclick="return confirm('Удалить продукт #<?php echo (int)$product['id']; ?>?');"><i class="fas fa-trash"></i> Удалить</a>
                                 </td>
                             </tr>
@@ -670,14 +676,14 @@ function stars($n){ $n = (int)$n; $n = max(0, min(5,$n)); return str_repeat('★
                                 <td><?php echo nl2br(htmlspecialchars($item['content'])); ?></td>
                                 <td><?php echo htmlspecialchars($item['date']); ?></td>
                                 <td>
-                                    <?php if (!empty($item['image'])): ?>
-                                        <img src="data:image/jpeg;base64,<?php echo base64_encode($item['image']); ?>" class="news-image" alt="Изображение">
+                                    <?php $imgSrc = getImageSrc($item['image']); if ($imgSrc): ?>
+                                        <img src="<?php echo $imgSrc; ?>" class="news-image" alt="Изображение">
                                     <?php else: ?>
                                         Нет изображения
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <button type="button" class="btn-edit" onclick="openNewsModal(<?php echo (int)$item['id']; ?>, <?php echo json_encode(htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8')); ?>, <?php echo json_encode(htmlspecialchars($item['content'], ENT_QUOTES, 'UTF-8')); ?>, '<?php echo !empty($item['image']) ? 'data:image/jpeg;base64,' . base64_encode($item['image']) : ''; ?>')"><i class="fas fa-edit"></i> Редактировать</button>
+                                    <button type="button" class="btn-edit" onclick="openNewsModal(<?php echo (int)$item['id']; ?>, '<?php echo addslashes(htmlspecialchars($item['title'])); ?>', '<?php echo addslashes(htmlspecialchars($item['content'])); ?>', '<?php echo !empty($item['image']) ? addslashes('data:image/jpeg;base64,' . base64_encode($item['image'])) : ''; ?>')"><i class="fas fa-edit"></i> Редактировать</button>
                                     <a href="admin.php?delete_news=<?php echo (int)$item['id']; ?>#news" class="btn-delete" onclick="return confirm('Удалить новость #<?php echo (int)$item['id']; ?>?');"><i class="fas fa-trash"></i> Удалить</a>
                                 </td>
                             </tr>
