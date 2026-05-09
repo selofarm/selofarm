@@ -96,24 +96,20 @@ if (isset($_POST['checkout'])) {
     } elseif (empty($_SESSION['cart'])) {
         $error = "Корзина пуста.";
     } else {
-        // Если у вас есть авторизация — положите туда реальный id пользователя
-        $userId = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0; // 0 = гость
-
         try {
             $conn->beginTransaction();
 
-            // 1) Создаём заказ (вставляем user_id и status='Open')
+            // 1) Создаём заказ
             $stmt = $conn->prepare("
-                INSERT INTO orders (user_id, first_name, last_name, phone, shipping_address, order_date, status)
-                VALUES (:uid, :fn, :ln, :ph, :addr, NOW(), :st)
+                INSERT INTO orders (first_name, last_name, phone, shipping_address, order_date, status)
+                VALUES (:fn, :ln, :ph, :addr, NOW(), :st)
             ");
             $stmt->execute([
-                ':uid'  => $userId,
                 ':fn'   => $first_name,
                 ':ln'   => $last_name,
                 ':ph'   => $phone,
                 ':addr' => $shipping_address,
-                ':st'   => 'Open', // соответствует вашему ENUM
+                ':st'   => 'Новый',
             ]);
             $order_id = (int)$conn->lastInsertId();
 
