@@ -72,7 +72,6 @@ $product = $stmt->fetch();
             }
         ?>
             <img src="<?= $piSrc ?>" alt="product" class="product-img">
-        <?php endif; ?>
     <?php else: ?>
         <!-- Заглушка если картинки нет -->
         <img src="img/no-image.jpg" alt="Нет изображения" class="product-img">
