@@ -25,7 +25,8 @@ require_once __DIR__ . '/db.php';
                 <?php
                 if (!empty($row['image'])) {
                     if (strlen($row['image']) > 200) {
-                        $imgSrc = "data:image/jpeg;base64," . base64_encode($row['image']);
+                        $d=$row['image']; if(substr($d,0,3)==="\xFF\xD8\xFF") $m='image/jpeg'; elseif(substr($d,0,4)==="\x89PNG") $m='image/png'; elseif(substr($d,0,3)==='GIF') $m='image/gif'; else $m='image/jpeg';
+                        $imgSrc = "data:{$m};base64," . base64_encode($d);
                     } else {
                         $imgSrc = htmlspecialchars($row['image']);
                     }

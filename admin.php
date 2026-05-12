@@ -426,7 +426,17 @@ function stars($n){ $n = (int)$n; $n = max(0, min(5,$n)); return str_repeat('★
 function getImageSrc($blob) {
     if (empty($blob)) return '';
     if (is_resource($blob)) return '';
-    return 'data:image/jpeg;base64,' . base64_encode((string)$blob);
+    $data = (string)$blob;
+    if (substr($data, 0, 3) === "\xFF\xD8\xFF") {
+        $mime = 'image/jpeg';
+    } elseif (substr($data, 0, 4) === "\x89PNG") {
+        $mime = 'image/png';
+    } elseif (substr($data, 0, 3) === 'GIF') {
+        $mime = 'image/gif';
+    } else {
+        $mime = 'image/jpeg';
+    }
+    return 'data:' . $mime . ';base64,' . base64_encode($data);
 }
 ?>
 <!DOCTYPE html>

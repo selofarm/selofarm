@@ -61,7 +61,8 @@ $product = $stmt->fetch();
     <?php if (!empty($product['image'])): ?>
         <?php if (strlen($product['image']) > 200): ?> 
             <!-- Скорее всего это BLOB -->
-            <img src="data:image/jpeg;base64,<?= base64_encode($product['image']) ?>" alt="product" class="product-img">
+            <?php $d=$product['image']; if(substr($d,0,3)==="\xFF\xD8\xFF") $m='image/jpeg'; elseif(substr($d,0,4)==="\x89PNG") $m='image/png'; elseif(substr($d,0,3)==='GIF') $m='image/gif'; else $m='image/jpeg'; ?>
+            <img src="data:<?= $m ?>;base64,<?= base64_encode($d) ?>" alt="product" class="product-img">
         <?php else: ?> 
             <!-- Скорее всего это путь -->
             <img src="<?= htmlspecialchars($product['image']) ?>" alt="product" class="product-img">

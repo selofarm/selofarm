@@ -18,7 +18,12 @@ function image_src($image): string {
     $hasBinary     = is_string($image) && preg_match('~[^\x09\x0A\x0D\x20-\x7E]~', $image);
 
     if ($image && !$looksLikePath && $hasBinary) {
-        return 'data:image/jpeg;base64,' . base64_encode($image);
+        $d = $image;
+        if (substr($d,0,3)==="\xFF\xD8\xFF") $m='image/jpeg';
+        elseif (substr($d,0,4)==="\x89PNG") $m='image/png';
+        elseif (substr($d,0,3)==='GIF') $m='image/gif';
+        else $m='image/jpeg';
+        return 'data:'.$m.';base64,' . base64_encode($d);
     }
     if ($looksLikePath) {
         global $BASE_URL;
