@@ -24,11 +24,15 @@ require_once __DIR__ . '/db.php';
             <div class="news-card">
                 <?php
                 if (!empty($row['image'])) {
-                    if (strlen($row['image']) > 200) {
-                        $d=$row['image']; if(substr($d,0,3)==="\xFF\xD8\xFF") $m='image/jpeg'; elseif(substr($d,0,4)==="\x89PNG") $m='image/png'; elseif(substr($d,0,3)==='GIF') $m='image/gif'; else $m='image/jpeg';
-                        $imgSrc = "data:{$m};base64," . base64_encode($d);
+                    $ni = $row['image'];
+                    if (preg_match('~\.(jpe?g|png|gif|webp)$~i', $ni)) {
+                        $imgSrc = htmlspecialchars('/' . ltrim($ni, '/'));
                     } else {
-                        $imgSrc = htmlspecialchars($row['image']);
+                        if(substr($ni,0,3)==="\xFF\xD8\xFF") $nm='image/jpeg';
+                        elseif(substr($ni,0,4)==="\x89PNG") $nm='image/png';
+                        elseif(substr($ni,0,3)==='GIF') $nm='image/gif';
+                        else $nm='image/jpeg';
+                        $imgSrc = "data:{$nm};base64," . base64_encode($ni);
                     }
                     echo "<img src='{$imgSrc}' alt='Новость' class='news-img'>";
                 }

@@ -427,6 +427,9 @@ function getImageSrc($blob) {
     if (empty($blob)) return '';
     if (is_resource($blob)) return '';
     $data = (string)$blob;
+    if (preg_match('~\.(jpe?g|png|gif|webp)$~i', $data)) {
+        return '/' . ltrim($data, '/');
+    }
     if (substr($data, 0, 3) === "\xFF\xD8\xFF") {
         $mime = 'image/jpeg';
     } elseif (substr($data, 0, 4) === "\x89PNG") {

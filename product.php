@@ -59,13 +59,19 @@ $product = $stmt->fetch();
         <?php endif; ?>
         <div class="product-details">
     <?php if (!empty($product['image'])): ?>
-        <?php if (strlen($product['image']) > 200): ?> 
-            <!-- Скорее всего это BLOB -->
-            <?php $d=$product['image']; if(substr($d,0,3)==="\xFF\xD8\xFF") $m='image/jpeg'; elseif(substr($d,0,4)==="\x89PNG") $m='image/png'; elseif(substr($d,0,3)==='GIF') $m='image/gif'; else $m='image/jpeg'; ?>
-            <img src="data:<?= $m ?>;base64,<?= base64_encode($d) ?>" alt="product" class="product-img">
-        <?php else: ?> 
-            <!-- Скорее всего это путь -->
-            <img src="<?= htmlspecialchars($product['image']) ?>" alt="product" class="product-img">
+        <?php
+            $pi = $product['image'];
+            if (preg_match('~\.(jpe?g|png|gif|webp)$~i', $pi)) {
+                $piSrc = htmlspecialchars('/' . ltrim($pi, '/'));
+            } else {
+                if(substr($pi,0,3)==="\xFF\xD8\xFF") $pm='image/jpeg';
+                elseif(substr($pi,0,4)==="\x89PNG") $pm='image/png';
+                elseif(substr($pi,0,3)==='GIF') $pm='image/gif';
+                else $pm='image/jpeg';
+                $piSrc = 'data:'.$pm.';base64,'.base64_encode($pi);
+            }
+        ?>
+            <img src="<?= $piSrc ?>" alt="product" class="product-img">
         <?php endif; ?>
     <?php else: ?>
         <!-- Заглушка если картинки нет -->
